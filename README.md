@@ -1,84 +1,72 @@
-# PersonalFinanceTracker
-Aplicacion simple para llevar un seguimiento de las finanzas
+# 📄 Requerimientos del Cliente – Personal Finance Tracker (API)
 
-📄 REQUERIMIENTOS DEL CLIENTE – Personal Finance Tracker (API)
-🧩 1. Descripción general
+## 1. Descripción General
+El cliente necesita una API que permita gestionar finanzas personales mediante el registro de ingresos, gastos, categorías y la visualización de estadísticas.  
+El objetivo es ofrecer un sistema simple, seguro y accesible desde aplicaciones móviles o web.
 
-Como cliente, necesito una API sencilla pero completa que me permita gestionar mis finanzas personales.
-Quiero poder registrar mis ingresos y gastos, clasificarlos por categorías y visualizar resúmenes claros que me permitan entender mi situación financiera.
+---
 
-🧑‍💼 2. Requerimientos funcionales
-🔐 2.1 Gestión de usuarios
+## 2. Requerimientos Funcionales
 
-El sistema debe permitirme crear una cuenta con email y contraseña.
+### 2.1 Gestión de Usuarios
+- **RF01:** El sistema debe permitir la creación de una cuenta usando email y contraseña.
+- **RF02:** El usuario debe poder iniciar sesión de forma segura.
+- **RF03:** Cada usuario debe acceder únicamente a sus propios datos (transacciones, categorías, estadísticas).
 
-Debo poder iniciar sesión y mantenerme autenticado de forma segura.
+---
 
-Solo yo debo poder ver mis transacciones, categorías y estadísticas.
+### 2.2 Gestión de Transacciones
+- **RF04:** Registrar transacciones de tipo *ingreso* o *gasto*.
+- **RF05:** Cada transacción debe incluir: monto, fecha, tipo, categoría y descripción.
+- **RF06:** El usuario debe poder editar transacciones existentes.
+- **RF07:** El usuario debe poder eliminar transacciones.
+- **RF08:** Consultar un listado de todas sus transacciones.
+- **RF09:** Filtrar transacciones por fecha, tipo o categoría.
 
-💸 2.2 Gestión de transacciones
+---
 
-Quiero poder registrar ingresos y gastos.
+### 2.3 Gestión de Categorías
+- **RF10:** Crear categorías personalizadas (ej.: “Supermercado”, “Salario”, “Transporte”).
+- **RF11:** Las categorías deben tener un tipo: *income* o *expense*.
+- **RF12:** Consultar todas las categorías creadas por el usuario.
 
-Cada transacción debe tener: monto, fecha, tipo (ingreso/gasto), categoría y descripción.
+---
 
-Necesito poder editar una transacción si me equivoco.
+### 2.4 Estadísticas
+- **RF13:** Visualizar el balance actual (ingresos totales - gastos totales).
+- **RF14:** Ver ingresos y gastos de un período específico (mensual, semanal o rango de fechas).
+- **RF15:** Ver resumen del gasto por categoría.
+- **RF16:** (Opcional) Ver tendencias mensuales de ingresos y gastos.
 
-También debo poder eliminar transacciones.
+---
 
-Necesito ver un listado completo de todas mis transacciones.
+## 3. Requerimientos No Funcionales
 
-Debo poder filtrar transacciones por fecha, tipo o categoría.
+### 3.1 Seguridad
+- **RNF01:** Las contraseñas deben almacenarse encriptadas.
+- **RNF02:** El sistema debe utilizar autenticación segura (tokens, JWT o similar).
 
-🏷️ 2.3 Gestión de categorías
+### 3.2 Rendimiento
+- **RNF03:** La API debe responder rápidamente y mantener buena performance bajo carga moderada.
+- **RNF04:** El sistema debe soportar múltiples usuarios concurrentes.
 
-Debo poder crear mis propias categorías (ejemplo: “Supermercado”, “Salario”, “Transporte”).
+### 3.3 Accesibilidad
+- **RNF05:** La API debe ser consumible fácilmente desde aplicaciones móviles o web mediante JSON.
 
-Cada categoría debe indicar si es para ingresos o gastos.
+### 3.4 Mantenibilidad
+- **RNF06:** La arquitectura del sistema debe ser clara y escalable para futuras mejoras.
+- **RNF07:** El código debe permitir agregar nuevas funcionalidades sin reescribir componentes principales.
 
-Debo poder ver la lista de todas mis categorías.
+---
 
-📊 2.4 Estadísticas
+## 4. Criterios de Aceptación
+- **CA01:** El usuario puede registrarse e iniciar sesión sin errores.
+- **CA02:** Al crear una transacción, aparece inmediatamente en el sistema.
+- **CA03:** Los cambios realizados en una transacción (editar/eliminar) se reflejan correctamente.
+- **CA04:** El balance se actualiza correctamente según las operaciones registradas.
+- **CA05:** Los filtros de transacciones (categoría, tipo, fecha) funcionan correctamente.
+- **CA06:** Las estadísticas coinciden con los datos ingresados por el usuario.
 
-Quiero ver mi balance actual (ingresos - gastos).
-
-Quiero ver cuánto gasté o gané en un período (mensual, semanal o personalizado).
-
-Necesito ver cuánto gasté por categoría.
-
-Opcionalmente, me gustaría ver tendencias mensuales.
-
-🏗️ 3. Requerimientos no funcionales
-🔒 Seguridad
-
-Mis datos deben estar protegidos y mi contraseña encriptada.
-
-El sistema debe usar un método seguro de autenticación (por ejemplo, tokens).
-
-⚡ Rendimiento
-
-La API debe responder de forma rápida y estable.
-
-Debe poder manejar varios usuarios sin que el rendimiento se degrade.
-
-📱 Accesibilidad
-
-La API debe poder ser consumida fácilmente por una app móvil o web.
-
-🛠️ Mantenibilidad
-
-Quiero que el sistema esté bien estructurado para que sea fácil agregar funciones en el futuro.
-
-🧪 4. Criterios de aceptación
-
-Puedo registrarme e iniciar sesión sin errores.
-
-Puedo registrar una transacción y verla inmediatamente en mi lista.
-
-Si elimino o edito una transacción, los cambios deben verse reflejados.
-
-El balance debe actualizarse correctamente.
-
-Los filtros deben funcionar (por categoría, tipo o fechas).
-
-Las estadísticas deben coincidir con los datos registrados.
+---
+- Compartir datos con otros usuarios.
+- Integración con bancos o servicios financieros.
