@@ -1,2 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FinanceTracker.Aplication/FinanceTracker.Aplication.csproj" />
+    <Project Path="src/FinanceTracker.Domain/FinanceTracker.Domain.csproj" />
+    <Project Path="src/FinanceTracker.Infrastructure/FinanceTracker.Infrastructure.csproj" />
+    <Project Path="src/FinanceTracker.Web/FinanceTracker.Web.csproj" Id="ecf9cf8c-a355-4928-bde0-9d7fa41e7619" />
+  </Folder>
 </Solution>
