@@ -53,7 +53,7 @@ public class Transaction
     /// <remarks>
     /// It is recommended to store times in UTC to avoid ambiguity across time zones.
     /// </remarks>
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
 
     /// <summary>
     /// Gets or sets an optional human-readable description or memo for the transaction.
