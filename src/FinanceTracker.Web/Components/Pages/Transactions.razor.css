@@ -1,0 +1,48 @@
+.page-title {
+    font-size: 28px;
+    margin-bottom: 24px;
+}
+
+.transactions {
+    max-width: 720px;      /* 👈 evita el vacío enorme */
+}
+
+.transaction {
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+}
+
+.transaction .left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.transaction .title {
+    font-weight: 600;
+}
+
+.transaction .category {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.transaction .amount {
+    font-size: 16px;
+}
+
+.transaction.expense .amount {
+    color: #dc2626;
+}
+
+.transaction.income .amount {
+    color: #16a34a;
+}
