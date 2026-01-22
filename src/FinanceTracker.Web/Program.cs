@@ -1,5 +1,6 @@
 using FinanceTracker.Infrastructure;
 using FinanceTracker.Web.Components;
+using FinanceTracker.Web.States.Errors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+//Register States
+builder.Services.AddScoped<ErrorState>();
 
 var app = builder.Build();
 

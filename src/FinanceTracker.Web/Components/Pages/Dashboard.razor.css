@@ -1,0 +1,26 @@
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px rgba(0,0,0,.06);
+}
+
+.card span {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.card strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 26px;
+}
+
+.positive { color: #16a34a; }
+.negative { color: #dc2626; }
