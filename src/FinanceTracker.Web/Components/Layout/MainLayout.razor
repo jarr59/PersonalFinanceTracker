@@ -1,24 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="app-layout">
-    <aside class="sidebar">
-        <h2 class="logo">Finance</h2>
-        <nav>
-            <a class="active">Dashboard</a>
-            <a href="/Accounts">Cuentas</a>
-            <a href="/Transactions">Movimientos</a>
-            <a href="/Categories">Categorías</a>
-        </nav>
-    </aside>
-
-    <main class="content">
-        @Body
-    </main>
+<div id="app">
+    @Body
 </div>
 
-
-<div id="blazor-error-ui" data-nosnippet>
+<div id="blazor-error-ui" data-nosnippet style="display: position: fixed; top: 0; left: 0; width: 100%; background: #ff6b6b; color: white; padding: 20px; text-align: center; z-index: 9999;">
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <a href="." class="reload" style="color: white; margin-left: 20px; text-decoration: underline;">Reload</a>
+    <span class="dismiss" style="cursor: pointer; margin-left: 20px;">🗙</span>
 </div>

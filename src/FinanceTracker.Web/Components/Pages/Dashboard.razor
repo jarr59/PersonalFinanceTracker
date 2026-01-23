@@ -1,20 +1,98 @@
 @page "/"
+@rendermode InteractiveServer
 
-<section class="cards">
-    <div class="card">
-        <span>Balance Total</span>
-        <strong>$4,250.00</strong>
+<Sidebar />
+
+<div class="main-content">
+    <TopHeader />
+
+    <!-- Metric Cards Grid -->
+    <div class="dashboard-grid">
+        <MetricCard Label="Credits" Value="$15,980" />
+        <MetricCard Label="Debts" Value="$4,324" />
+        <BalanceCard Amount="$1242.42 USD" CardNumber="0495 7381 3759 2321" CardDate="04 / 24" />
     </div>
-    <div class="card">
-        <span>Ingresos</span>
-        <strong class="positive">$2,100.00</strong>
+
+    <!-- Transactions and Balance Section -->
+    <div class="dashboard-grid">
+        <div style="grid-column: span 2;">
+            <TransactionList Transactions="GetTransactions()" />
+        </div>
+        
+        <div>
+            <div class="chart-container">
+                <div class="chart-title">
+                    Balance
+                    <button class="chart-filter">2020 ▼</button>
+                </div>
+                <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                    📊 Monthly Balance Chart
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <span>Gastos</span>
-        <strong class="negative">$1,450.00</strong>
-    </div>
-    <div class="card">
-        <span>Ahorro</span>
-        <strong>$650.00</strong>
-    </div>
-</section>
+
+    <!-- Account Summary -->
+    <AccountSummary SummaryItems="GetSummaryItems()" />
+</div>
+
+@code {
+    private List<TransactionList.TransactionItemModel> GetTransactions()
+    {
+        return new()
+        {
+            new() { 
+                Icon = "<span style='color: #fbbf24;'>💳</span>",
+                Name = "Payment to Misery",
+                Date = "Mon, Mar 1",
+                Amount = "-$580.00"
+            },
+            new() { 
+                Icon = "<span style='color: #4f46e5;'>💰</span>",
+                Name = "Salary from GND",
+                Date = "Mon, Mar 1",
+                Amount = "+$12,200.00"
+            },
+            new() { 
+                Icon = "<span style='color: #ec4899;'>🔄</span>",
+                Name = "Transfer to Home via TransferWise",
+                Date = "Mon, Mar 1",
+                Amount = "-$3,000.00"
+            },
+            new() { 
+                Icon = "<span style='color: #22c55e;'>↩️</span>",
+                Name = "Receive Refund",
+                Date = "Mon, Mar 1",
+                Amount = "+$1,550.00"
+            }
+        };
+    }
+
+    private List<AccountSummary.SummaryItemModel> GetSummaryItems()
+    {
+        return new()
+        {
+            new() { 
+                Icon = "📅",
+                Label = "This Week",
+                Value = "3.45k",
+                Color = "#e9a0d4",
+                ChangePercentage = "+2.45%"
+            },
+            new() { 
+                Icon = "📊",
+                Label = "This Month",
+                Value = "$12.9k",
+                Color = "#5b6eff",
+                ChangePercentage = "-3.1%"
+            },
+            new() { 
+                Icon = "🎯",
+                Label = "Upcoming",
+                Value = "$14.4k",
+                Color = "#fbbf24",
+                ChangePercentage = "+10.5%"
+            }
+        };
+    }
+}

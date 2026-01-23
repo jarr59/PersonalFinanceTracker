@@ -1,0 +1,35 @@
+@* Account Summary Component *@
+
+<div class="account-summary">
+    <h3 class="summary-title">Account Summary</h3>
+    
+    <div class="summary-cards">
+        @foreach (var item in SummaryItems)
+        {
+            <div class="summary-item">
+                <div class="summary-icon" style="background-color: @item.Color;">
+                    @((MarkupString)item.Icon)
+                </div>
+                <p class="summary-label">@item.Label</p>
+                <p class="summary-value">@item.Value</p>
+                <p class="summary-change @(item.ChangePercentage.StartsWith("-") ? "negative" : "positive")">
+                    @item.ChangePercentage
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<SummaryItemModel> SummaryItems { get; set; } = new();
+
+    public class SummaryItemModel
+    {
+        public string Icon { get; set; } = "📊";
+        public string Label { get; set; } = "Label";
+        public string Value { get; set; } = "$0.00";
+        public string Color { get; set; } = "#e9a0d4";
+        public string ChangePercentage { get; set; } = "+0%";
+    }
+}

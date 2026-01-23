@@ -1,0 +1,42 @@
+@* Transaction List Component *@
+
+<div class="transactions-section">
+    <div class="transactions-header">
+        <h3>Latest Transactions</h3>
+        <div class="transactions-actions">
+            <button class="icon-btn">🔍</button>
+            <button class="icon-btn">⋮</button>
+        </div>
+    </div>
+
+    <div class="transactions-list">
+        @foreach (var transaction in Transactions)
+        {
+            <div class="transaction-item">
+                <div class="transaction-icon">
+                    @((MarkupString)transaction.Icon)
+                </div>
+                <div class="transaction-info">
+                    <p class="transaction-name">@transaction.Name</p>
+                    <p class="transaction-date">@transaction.Date</p>
+                </div>
+                <p class="transaction-amount @(transaction.Amount.StartsWith("-") ? "expense" : "income")">
+                    @transaction.Amount
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<TransactionItemModel> Transactions { get; set; } = new();
+
+    public class TransactionItemModel
+    {
+        public string Icon { get; set; } = "📝";
+        public string Name { get; set; } = "Transaction";
+        public string Date { get; set; } = "Mon, Mar 1";
+        public string Amount { get; set; } = "$0.00";
+    }
+}

@@ -1,26 +1,74 @@
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
+body {
+  background-color: #f8f9fb;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 10px 20px rgba(0,0,0,.06);
+/* Tarjeta balance */
+.balance-card {
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
 }
 
-.card span {
-    color: #6b7280;
-    font-size: 14px;
+/* Cards resumen */
+.summary-card {
+  border-radius: 14px;
+  border: none;
+  background-color: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-.card strong {
-    display: block;
-    margin-top: 8px;
-    font-size: 26px;
+/* Tabla */
+.table td {
+  padding: 0.75rem 0;
 }
 
-.positive { color: #16a34a; }
-.negative { color: #dc2626; }
+.action-btn {
+  width: 48%;
+  height: 80px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 600;
+  color: white;
+}
+
+.action-btn.income {
+  background-color: #16a34a;
+}
+
+.action-btn.expense {
+  background-color: #dc2626;
+}
+
+.btn {
+  height: 64px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.summary-card {
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+}
+
+.movement {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.amount.income {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.amount.expense {
+  color: #dc2626;
+  font-weight: 600;
+}
