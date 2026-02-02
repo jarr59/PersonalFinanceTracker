@@ -5,6 +5,7 @@ namespace FinanceTracker.Infrastructure.Persistence;
 public class FinanceTrackerDbContext(DbContextOptions<FinanceTrackerDbContext> options) : DbContext(options)
 {
     public DbSet<Domain.Transaction.Transaction> Transactions { get; set; }
+    public DbSet<Domain.Categories.Category> Categories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
