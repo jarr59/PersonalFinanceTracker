@@ -1,4 +1,8 @@
 @page "/"
+@using FinanceTracker.Web.States.Transactions
+@using FinanceTracker.Web.States.Accounts
+@inject TransactionState TransactionState
+@inject AccountState AccountState
 @rendermode InteractiveServer
 
 <Sidebar />
@@ -8,9 +12,12 @@
 
     <!-- Metric Cards Grid -->
     <div class="dashboard-grid">
-        <MetricCard Label="Credits" Value="$15,980" />
-        <MetricCard Label="Debts" Value="$4,324" />
-        <BalanceCard Amount="$1242.42 USD" CardNumber="0495 7381 3759 2321" CardDate="04 / 24" />
+        <MetricCard Label="Ingresos" Value="@($"${TransactionState.GetTotalIncome():N2}")" />
+        <MetricCard Label="Gastos" Value="@($"${TransactionState.GetTotalExpenses():N2}")" />
+        <BalanceCard 
+            Amount="@($"${GetTotalBalance():N2} USD")" 
+            CardNumber="@(AccountState.Accounts.FirstOrDefault()?.Name ?? "N/A")" 
+            CardDate="@DateTime.Now.ToString("MM / yy")" />
     </div>
 
     <!-- Transactions and Balance Section -->
@@ -22,11 +29,20 @@
         <div>
             <div class="chart-container">
                 <div class="chart-title">
-                    Balance
-                    <button class="chart-filter">2020 ▼</button>
+                    Cuentas Activas
+                    <button class="chart-filter">@DateTime.Now.Year ▼</button>
                 </div>
-                <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-                    📊 Monthly Balance Chart
+                <div style="padding: 20px;">
+                    @foreach (var account in AccountState.Accounts.Take(3))
+                    {
+                        <div style="margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, @account.Color 0%, @account.Color + "aa" 100%); border-radius: 12px; color: white;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">
+                                <span class="material-icons">@account.Icon</span>
+                            </div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">@account.Name</div>
+                            <div style="font-size: 18px; font-weight: 700;">$@account.Balance.ToString("N2")</div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -37,62 +53,67 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        TransactionState.OnChange += StateHasChanged;
+        AccountState.OnChange += StateHasChanged;
+    }
+
+    private decimal GetTotalBalance()
+    {
+        return AccountState.Accounts.Sum(a => a.Balance);
+    }
+
     private List<TransactionList.TransactionItemModel> GetTransactions()
     {
-        return new()
+        return TransactionState.GetRecentTransactions(5).Select(t => new TransactionList.TransactionItemModel
         {
-            new() { 
-                Icon = "<span style='color: #fbbf24;'>💳</span>",
-                Name = "Payment to Misery",
-                Date = "Mon, Mar 1",
-                Amount = "-$580.00"
-            },
-            new() { 
-                Icon = "<span style='color: #4f46e5;'>💰</span>",
-                Name = "Salary from GND",
-                Date = "Mon, Mar 1",
-                Amount = "+$12,200.00"
-            },
-            new() { 
-                Icon = "<span style='color: #ec4899;'>🔄</span>",
-                Name = "Transfer to Home via TransferWise",
-                Date = "Mon, Mar 1",
-                Amount = "-$3,000.00"
-            },
-            new() { 
-                Icon = "<span style='color: #22c55e;'>↩️</span>",
-                Name = "Receive Refund",
-                Date = "Mon, Mar 1",
-                Amount = "+$1,550.00"
-            }
-        };
+            Icon = $"<span class='material-icons' style='color: {t.CategoryColor};'>{t.CategoryIcon}</span>",
+            Name = t.Description,
+            Date = t.Date.ToString("ddd, MMM d"),
+            Amount = t.Amount >= 0 ? $"+${t.Amount:N2}" : $"-${Math.Abs(t.Amount):N2}"
+        }).ToList();
     }
 
     private List<AccountSummary.SummaryItemModel> GetSummaryItems()
     {
+        var weekTransactions = TransactionState.Transactions
+            .Where(t => t.Date >= DateTime.Now.AddDays(-7))
+            .Sum(t => t.Amount);
+        
+        var monthTransactions = TransactionState.Transactions
+            .Where(t => t.Date >= DateTime.Now.AddMonths(-1))
+            .Sum(t => t.Amount);
+
         return new()
         {
             new() { 
                 Icon = "📅",
-                Label = "This Week",
-                Value = "3.45k",
+                Label = "Esta Semana",
+                Value = $"${Math.Abs(weekTransactions):N1}k",
                 Color = "#e9a0d4",
-                ChangePercentage = "+2.45%"
+                ChangePercentage = weekTransactions >= 0 ? $"+{weekTransactions:N1}%" : $"{weekTransactions:N1}%"
             },
             new() { 
                 Icon = "📊",
-                Label = "This Month",
-                Value = "$12.9k",
+                Label = "Este Mes",
+                Value = $"${Math.Abs(monthTransactions):N1}k",
                 Color = "#5b6eff",
-                ChangePercentage = "-3.1%"
+                ChangePercentage = monthTransactions >= 0 ? $"+{monthTransactions:N1}%" : $"{monthTransactions:N1}%"
             },
             new() { 
-                Icon = "🎯",
-                Label = "Upcoming",
-                Value = "$14.4k",
+                Icon = "💰",
+                Label = "Balance Total",
+                Value = $"${GetTotalBalance():N1}k",
                 Color = "#fbbf24",
-                ChangePercentage = "+10.5%"
+                ChangePercentage = "+100%"
             }
         };
+    }
+
+    public void Dispose()
+    {
+        TransactionState.OnChange -= StateHasChanged;
+        AccountState.OnChange -= StateHasChanged;
     }
 }

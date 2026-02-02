@@ -1,0 +1,94 @@
+@page "/categories"
+@using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.Components.Categories
+@inject CategoryState CategoryState
+@rendermode InteractiveServer
+
+<Sidebar />
+
+<div class="main-content">
+    <TopHeader />
+
+    <div class="page-header">
+        <h1 class="page-title">Categorías</h1>
+        <button class="btn-primary" @onclick="OpenAddModal">
+            <span class="material-icons">add</span> Nueva Categoría
+        </button>
+    </div>
+
+    <div class="categories-grid">
+        @foreach (var category in CategoryState.Categories)
+        {
+            <CategoryCard Category="@category" 
+                         OnEdit="@(() => OpenEditModal(category))" 
+                         OnDelete="@(() => DeleteCategory(category.Id))" />
+        }
+    </div>
+
+    <CategoryModal IsVisible="@showModal"
+                   IsEditing="@isEditing"
+                   Category="@currentCategory"
+                   OnClose="@CloseModal"
+                   OnSave="@SaveCategory" />
+</div>
+
+@code {
+    private bool showModal = false;
+    private bool isEditing = false;
+    private CategoryModel currentCategory = new();
+
+    protected override void OnInitialized()
+    {
+        CategoryState.OnChange += StateHasChanged;
+    }
+
+    private void OpenAddModal()
+    {
+        isEditing = false;
+        currentCategory = new CategoryModel { Id = Guid.NewGuid(), Color = "#3b82f6", Icon = "category" };
+        showModal = true;
+    }
+
+    private void OpenEditModal(CategoryModel category)
+    {
+        isEditing = true;
+        currentCategory = new CategoryModel
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Color = category.Color,
+            Icon = category.Icon
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentCategory = new();
+    }
+
+    private void SaveCategory(CategoryModel category)
+    {
+        if (isEditing)
+        {
+            CategoryState.UpdateCategory(category);
+        }
+        else
+        {
+            CategoryState.AddCategory(category);
+        }
+
+        CloseModal();
+    }
+
+    private void DeleteCategory(Guid id)
+    {
+        CategoryState.DeleteCategory(id);
+    }
+
+    public void Dispose()
+    {
+        CategoryState.OnChange -= StateHasChanged;
+    }
+}

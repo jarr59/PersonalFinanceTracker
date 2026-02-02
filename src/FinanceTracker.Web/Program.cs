@@ -1,6 +1,9 @@
 using FinanceTracker.Infrastructure;
 using FinanceTracker.Web.Components;
 using FinanceTracker.Web.States.Errors;
+using FinanceTracker.Web.States.Categories;
+using FinanceTracker.Web.States.Accounts;
+using FinanceTracker.Web.States.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,9 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 //Register States
 builder.Services.AddScoped<ErrorState>();
+builder.Services.AddScoped<CategoryState>();
+builder.Services.AddScoped<AccountState>();
+builder.Services.AddScoped<TransactionState>();
 
 var app = builder.Build();
 

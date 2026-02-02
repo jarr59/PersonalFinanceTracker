@@ -1,0 +1,38 @@
+@using FinanceTracker.Web.States.Categories
+
+<div class="category-card" style="border-left: 4px solid @Category.Color;">
+    <div class="category-icon" style="background: @(Category.Color)22; color: @Category.Color;">
+        <span class="material-icons">@Category.Icon</span>
+    </div>
+    <div class="category-info">
+        <h3 class="category-name">@Category.Name</h3>
+        <div class="category-meta">
+            <span class="category-color" style="background: @Category.Color;"></span>
+            <span class="category-color-code">@Category.Color</span>
+        </div>
+    </div>
+    <div class="category-actions">
+        <button class="btn-icon" @onclick="HandleEdit">
+            <span class="material-icons">edit</span>
+        </button>
+        <button class="btn-icon btn-danger" @onclick="HandleDelete">
+            <span class="material-icons">delete</span>
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CategoryModel Category { get; set; } = new();
+    [Parameter] public EventCallback<CategoryModel> OnEdit { get; set; }
+    [Parameter] public EventCallback<Guid> OnDelete { get; set; }
+
+    private async Task HandleEdit()
+    {
+        await OnEdit.InvokeAsync(Category);
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync(Category.Id);
+    }
+}

@@ -1,0 +1,60 @@
+@* Modal component reutilizable *@
+
+@if (IsVisible)
+{
+    <div class="modal-overlay" @onclick="OnOverlayClick">
+        <div class="modal-content @(Size == ModalSize.Small ? "modal-small" : "")" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2>@Title</h2>
+                <button class="btn-close" @onclick="OnClose">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            @if (ShowFooter)
+            {
+                <div class="modal-footer">
+                    @if (FooterContent != null)
+                    {
+                        @FooterContent
+                    }
+                    else
+                    {
+                        <button class="btn-secondary" @onclick="OnClose">@CancelText</button>
+                        <button class="btn-primary" @onclick="OnSave">@SaveText</button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public bool ShowFooter { get; set; } = true;
+    [Parameter] public string SaveText { get; set; } = "Guardar";
+    [Parameter] public string CancelText { get; set; } = "Cancelar";
+    [Parameter] public ModalSize Size { get; set; } = ModalSize.Normal;
+    [Parameter] public bool CloseOnOverlayClick { get; set; } = true;
+
+    private async Task OnOverlayClick()
+    {
+        if (CloseOnOverlayClick)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    public enum ModalSize
+    {
+        Normal,
+        Small
+    }
+}
