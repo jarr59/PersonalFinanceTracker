@@ -1,3 +1,4 @@
+using CustomMediator.CQRS;
 using FinanceTracker.Domain.ValueObjects;
 using FinanceTracker.Aplication.Categories.Commands;
 using FinanceTracker.Aplication.Categories.Queries;
@@ -12,14 +13,14 @@ public class CategoryService
 {
     private readonly CreateCategoryCommandHandler _createHandler;
     private readonly UpdateCategoryCommandHandler _updateHandler;
-    private readonly GetAllCategories.Handler _getAllHandler;
-    private readonly GetCategoryById.Handler _getByIdHandler;
+    private readonly GetAllCategoriesQueryHandler _getAllHandler;
+    private readonly GetCategoryByIdQueryHandler _getByIdHandler;
 
     public CategoryService(
         CreateCategoryCommandHandler createHandler,
         UpdateCategoryCommandHandler updateHandler,
-        GetAllCategories.Handler getAllHandler,
-        GetCategoryById.Handler getByIdHandler)
+        GetAllCategoriesQueryHandler getAllHandler,
+        GetCategoryByIdQueryHandler getByIdHandler)
     {
         _createHandler = createHandler;
         _updateHandler = updateHandler;
@@ -33,7 +34,7 @@ public class CategoryService
     public async Task CreateCategoryAsync(string name, string colorHex, string iconSource)
     {
         var command = new CreateCategoryCommand(name, colorHex, iconSource);
-        await _createHandler.Handle(command);
+        await _createHandler.HandleAsync(command);
     }
 
     /// <summary>
@@ -42,7 +43,7 @@ public class CategoryService
     public async Task UpdateCategoryAsync(Guid id, string name, string colorHex, string iconSource)
     {
         var command = new UpdateCategoryCommand(id, name, colorHex, iconSource);
-        await _updateHandler.Handle(command);
+        await _updateHandler.HandleAsync(command);
     }
 
     /// <summary>
@@ -50,8 +51,8 @@ public class CategoryService
     /// </summary>
     public async Task<List<CategoryDto>> GetAllCategoriesAsync()
     {
-        var query = new GetAllCategories.Query();
-        var categories = await _getAllHandler.Handle(query);
+        var query = new GetAllCategoriesQuery();
+        var categories = await _getAllHandler.HandleAsync(query);
         
         return categories.Select(c => new CategoryDto
         {
@@ -67,8 +68,8 @@ public class CategoryService
     /// </summary>
     public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id)
     {
-        var query = new GetCategoryById.Query(id);
-        var category = await _getByIdHandler.Handle(query);
+        var query = new GetCategoryByIdQuery(id);
+        var category = await _getByIdHandler.HandleAsync(query);
         
         if (category == null)
             return null;

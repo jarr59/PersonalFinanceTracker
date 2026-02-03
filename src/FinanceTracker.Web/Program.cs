@@ -18,11 +18,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Register CQRS Handlers
+// Register CQRS Command Handlers
 builder.Services.AddScoped<CreateCategoryCommandHandler>();
 builder.Services.AddScoped<UpdateCategoryCommandHandler>();
-builder.Services.AddScoped<GetAllCategories.Handler>();
-builder.Services.AddScoped<GetCategoryById.Handler>();
+
+// Register CQRS Query Handlers
+builder.Services.AddScoped<GetAllCategoriesQueryHandler>();
+builder.Services.AddScoped<GetCategoryByIdQueryHandler>();
 
 // Register Application Services
 builder.Services.AddScoped<CategoryService>();

@@ -31,6 +31,7 @@
                 <div class="chart-title">
                     Cuentas Activas
                     <button class="chart-filter">@DateTime.Now.Year ▼</button>
+                    <button class="chart-filter" @onclick="CreateError">Crear error</button>
                 </div>
                 <div style="padding: 20px;">
                     @foreach (var account in AccountState.Accounts.Take(3))
@@ -58,7 +59,10 @@
         TransactionState.OnChange += StateHasChanged;
         AccountState.OnChange += StateHasChanged;
     }
-
+    void CreateError()
+    {
+        throw new Exception("This is a test exception.");
+    }
     private decimal GetTotalBalance()
     {
         return AccountState.Accounts.Sum(a => a.Balance);

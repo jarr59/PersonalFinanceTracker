@@ -3,22 +3,12 @@ using FinanceTracker.Domain.Interfaces.Repositories;
 
 namespace FinanceTracker.Aplication.Categories.Queries;
 
-public static class GetCategoryById
+public sealed record GetCategoryByIdQuery(Guid Id) : ICustomQuery<Category?>;
+
+public class GetCategoryByIdQueryHandler(ICategoryRepository _repository) : ICustomQueryHandler<GetCategoryByIdQuery, Category?>
 {
-    public sealed record Query(Guid Id);
-
-    public class Handler
+    public async Task<Category?> HandleAsync(GetCategoryByIdQuery query, CancellationToken cancellationToken = default)
     {
-        private readonly ICategoryRepository _repository;
-
-        public Handler(ICategoryRepository repository)
-        {
-            _repository = repository;
-        }
-
-        public async Task<Category?> Handle(Query query)
-        {
-            return await _repository.GetById(query.Id);
-        }
+        return await _repository.GetById(query.Id);
     }
 }
