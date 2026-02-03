@@ -4,6 +4,11 @@ using FinanceTracker.Web.States.Errors;
 using FinanceTracker.Web.States.Categories;
 using FinanceTracker.Web.States.Accounts;
 using FinanceTracker.Web.States.Transactions;
+using FinanceTracker.Aplication.Categories.Commands;
+using FinanceTracker.Aplication.Categories.Queries;
+using FinanceTracker.Web.Services.Categories;
+using FinanceTracker.Web.Services.Accounts;
+using FinanceTracker.Web.Services.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +17,17 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Register CQRS Handlers
+builder.Services.AddScoped<CreateCategoryCommandHandler>();
+builder.Services.AddScoped<UpdateCategoryCommandHandler>();
+builder.Services.AddScoped<GetAllCategories.Handler>();
+builder.Services.AddScoped<GetCategoryById.Handler>();
+
+// Register Application Services
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<TransactionService>();
 
 //Register States
 builder.Services.AddScoped<ErrorState>();

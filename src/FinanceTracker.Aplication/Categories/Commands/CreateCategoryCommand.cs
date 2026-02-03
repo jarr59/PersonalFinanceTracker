@@ -1,29 +1,20 @@
-using FinanceTracker.Domain.ValueObjects;
 using FinanceTracker.Domain.Categories;
 using FinanceTracker.Domain.Interfaces.Repositories;
-using System.Threading;
-using System.Threading.Tasks;
+using FinanceTracker.Domain.ValueObjects;
 
 namespace FinanceTracker.Aplication.Categories.Commands;
 
-public sealed record CreateCategoryCommand(string Name, string ColorHex, string IconSource);
+public sealed record CreateCategoryCommand(string Name, string ColorHex, string IconSource) : ICustomCommand<Category>;
 
 
-public class CreateCategoryCommandHandler
+public class CreateCategoryCommandHandler(ICategoryRepository _repository,
+                                          IUnitOfWork _unitOfWork) : ICustomCommandHandler<CreateCategoryCommand, Category>
 {
-    private readonly ICategoryRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CreateCategoryCommandHandler(ICategoryRepository repository, IUnitOfWork unitOfWork)
+    public async Task<Category> HandleAsync(CreateCategoryCommand command, CancellationToken cancellationToken = default)
     {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
-    }
-
-    public async Task Handle(CreateCategoryCommand command, CancellationToken cancellationToken = default)
-    {
-        var category = new Category(new NameVO(command.Name), new ColorVO(command.ColorHex), new IconVO(command.IconSource));
+        Category category = new(new NameVO(command.Name), new ColorVO(command.ColorHex), new IconVO(command.IconSource));
         await _repository.Add(category);
         await _unitOfWork.SaveChanges(cancellationToken);
+        return category;
     }
 }
