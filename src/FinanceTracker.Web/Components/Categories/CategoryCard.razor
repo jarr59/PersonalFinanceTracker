@@ -1,14 +1,15 @@
 @using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.States.Categories.DTOs
 
-<div class="category-card" style="border-left: 4px solid @Category.Color;">
-    <div class="category-icon" style="background: @(Category.Color)22; color: @Category.Color;">
-        <span class="material-icons">@Category.Icon</span>
+<div class="category-card" style="border-left: 4px solid @CurrentCategory.Color;">
+    <div class="category-icon" style="background: @(CurrentCategory.Color)22; color: @CurrentCategory.Color;">
+        <span class="material-icons">@CurrentCategory.Icon</span>
     </div>
     <div class="category-info">
-        <h3 class="category-name">@Category.Name</h3>
+        <h3 class="category-name">@CurrentCategory.Name</h3>
         <div class="category-meta">
-            <span class="category-color" style="background: @Category.Color;"></span>
-            <span class="category-color-code">@Category.Color</span>
+            <span class="category-color" style="background: @CurrentCategory.Color;"></span>
+            <span class="category-color-code">@CurrentCategory.Color</span>
         </div>
     </div>
     <div class="category-actions">
@@ -22,17 +23,29 @@
 </div>
 
 @code {
-    [Parameter] public CategoryModel Category { get; set; } = new();
+    /// <summary>
+    /// Categoria actual a mostrar
+    /// </summary>
+    [Parameter] 
+    public CategoryModel CurrentCategory { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     [Parameter] public EventCallback<CategoryModel> OnEdit { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     [Parameter] public EventCallback<Guid> OnDelete { get; set; }
 
     private async Task HandleEdit()
     {
-        await OnEdit.InvokeAsync(Category);
+        await OnEdit.InvokeAsync(CurrentCategory);
     }
 
     private async Task HandleDelete()
     {
-        await OnDelete.InvokeAsync(Category.Id);
+        await OnDelete.InvokeAsync(CurrentCategory.Id);
     }
 }

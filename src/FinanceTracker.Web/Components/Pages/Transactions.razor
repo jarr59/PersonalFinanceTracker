@@ -195,9 +195,7 @@
         var category = CategoryState.Categories.FirstOrDefault(c => c.Id == currentTransaction.CategoryId);
         if (category != null)
         {
-            currentTransaction.CategoryName = category.Name;
-            currentTransaction.CategoryIcon = category.Icon;
-            currentTransaction.CategoryColor = category.Color;
+   
         }
 
         var account = AccountState.Accounts.FirstOrDefault(a => a.Id == currentTransaction.AccountId);

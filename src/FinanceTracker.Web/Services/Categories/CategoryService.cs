@@ -1,96 +1,55 @@
-using CustomMediator.CQRS;
-using FinanceTracker.Domain.ValueObjects;
+using CustomMediator;
 using FinanceTracker.Aplication.Categories.Commands;
 using FinanceTracker.Aplication.Categories.Queries;
+using FinanceTracker.Domain.Categories;
+using FinanceTracker.Web.States.Categories;
+using FinanceTracker.Web.States.Categories.DTOs;
 
 namespace FinanceTracker.Web.Services.Categories;
 
 /// <summary>
 /// Service for managing category operations using CQRS pattern.
-/// Encapsulates all category-related business logic.
+/// Encapsulates all category-related business logic and state management.
 /// </summary>
-public class CategoryService
+public class CategoryService(IMediator mediator, CategoryState _categoryState)
 {
-    private readonly CreateCategoryCommandHandler _createHandler;
-    private readonly UpdateCategoryCommandHandler _updateHandler;
-    private readonly GetAllCategoriesQueryHandler _getAllHandler;
-    private readonly GetCategoryByIdQueryHandler _getByIdHandler;
-
-    public CategoryService(
-        CreateCategoryCommandHandler createHandler,
-        UpdateCategoryCommandHandler updateHandler,
-        GetAllCategoriesQueryHandler getAllHandler,
-        GetCategoryByIdQueryHandler getByIdHandler)
-    {
-        _createHandler = createHandler;
-        _updateHandler = updateHandler;
-        _getAllHandler = getAllHandler;
-        _getByIdHandler = getByIdHandler;
-    }
-
     /// <summary>
-    /// Creates a new category.
+    /// Creates a new category and updates the state.
     /// </summary>
     public async Task CreateCategoryAsync(string name, string colorHex, string iconSource)
     {
-        var command = new CreateCategoryCommand(name, colorHex, iconSource);
-        await _createHandler.HandleAsync(command);
+        Category result = await mediator.SendCommandAsync<CreateCategoryCommand, Category>(new CreateCategoryCommand(name, colorHex, iconSource));
+        
+        _categoryState.AddCategory([CategoryModel.FromDomain(result)]);
     }
 
     /// <summary>
-    /// Updates an existing category.
+    /// Updates an existing category and updates the state.
     /// </summary>
     public async Task UpdateCategoryAsync(Guid id, string name, string colorHex, string iconSource)
     {
-        var command = new UpdateCategoryCommand(id, name, colorHex, iconSource);
-        await _updateHandler.HandleAsync(command);
+        Category result = await mediator.SendCommandAsync<UpdateCategoryCommand, Category>(new UpdateCategoryCommand(id, name, colorHex, iconSource));
+
+        _categoryState.UpdateCategory(CategoryModel.FromDomain(result));
     }
 
     /// <summary>
-    /// Retrieves all categories.
+    /// Retrieves all categories from the repository.
     /// </summary>
-    public async Task<List<CategoryDto>> GetAllCategoriesAsync()
+    public async Task LoadAllCategories()
     {
-        var query = new GetAllCategoriesQuery();
-        var categories = await _getAllHandler.HandleAsync(query);
-        
-        return categories.Select(c => new CategoryDto
-        {
-            Id = c.Id,
-            Name = c.Name.Name,
-            Color = c.Color.Color,
-            Icon = c.Icon.Source
-        }).ToList();
+        List<Category> result = await mediator.SendQueryAsync<GetAllCategoriesQuery, List<Category>>(new GetAllCategoriesQuery());
+
+        _categoryState.CleanCategories();
+        _categoryState.AddCategory([.. result.Select(CategoryModel.FromDomain)]);
     }
 
     /// <summary>
-    /// Retrieves a category by ID.
+    /// Deletes a category from the state.
+    /// Note: Implement delete command in Application layer for repository deletion.
     /// </summary>
-    public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id)
+    public void DeleteCategory(Guid id)
     {
-        var query = new GetCategoryByIdQuery(id);
-        var category = await _getByIdHandler.HandleAsync(query);
-        
-        if (category == null)
-            return null;
-
-        return new CategoryDto
-        {
-            Id = category.Id,
-            Name = category.Name.Name,
-            Color = category.Color.Color,
-            Icon = category.Icon.Source
-        };
+        _categoryState.DeleteCategory(id);
     }
-}
-
-/// <summary>
-/// DTO for transferring category data between layers.
-/// </summary>
-public class CategoryDto
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Color { get; set; } = string.Empty;
-    public string Icon { get; set; } = string.Empty;
 }

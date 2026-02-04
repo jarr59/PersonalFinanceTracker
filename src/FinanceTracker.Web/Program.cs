@@ -9,6 +9,7 @@ using FinanceTracker.Aplication.Categories.Queries;
 using FinanceTracker.Web.Services.Categories;
 using FinanceTracker.Web.Services.Accounts;
 using FinanceTracker.Web.Services.Transactions;
+using CustomMediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +19,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Register CQRS Command Handlers
-builder.Services.AddScoped<CreateCategoryCommandHandler>();
-builder.Services.AddScoped<UpdateCategoryCommandHandler>();
-
-// Register CQRS Query Handlers
-builder.Services.AddScoped<GetAllCategoriesQueryHandler>();
-builder.Services.AddScoped<GetCategoryByIdQueryHandler>();
+// Register CQRS Command, Query and Handlers
+builder.Services.AddCustomMediator();
 
 // Register Application Services
 builder.Services.AddScoped<CategoryService>();
