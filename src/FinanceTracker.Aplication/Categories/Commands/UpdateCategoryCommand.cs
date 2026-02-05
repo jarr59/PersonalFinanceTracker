@@ -19,9 +19,7 @@ public class UpdateCategoryCommandHandler(ICategoryRepository _repository, IUnit
         existing.UpdateName(new NameVO(command.Name));
         existing.UpdateColor(new ColorVO(command.ColorHex));
         existing.UpdateIcon(new IconVO(command.IconSource));
-
-        await _repository.Update(existing);
-        await _unitOfWork.SaveChanges(cancellationToken);
+        await _unitOfWork.SaveChanges();
         
         return existing;
     }

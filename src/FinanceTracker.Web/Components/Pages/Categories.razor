@@ -1,10 +1,12 @@
 @page "/categories"
+@using FinanceTracker.Web.Components.Categories.ViewModels
 @using FinanceTracker.Web.States.Categories
 @using FinanceTracker.Web.Components.Categories
 @using FinanceTracker.Web.Services.Categories
 @using FinanceTracker.Web.States.Categories.DTOs
+@using static FinanceTracker.Web.Components.Shared.Modal
 @inject CategoryState CategoryState
-@inject CategoryService CategoryService
+@inject ICategoryServices CategoryService
 @inherits StateAwareComponent
 
 <Sidebar />
@@ -22,24 +24,33 @@
     <div class="categories-grid">
         @foreach (var category in CategoryState.Categories)
         {
-            <CategoryCard CurrentCategory="@category" 
-                         OnEdit="@(() => OpenEditModal(category))" 
-                         OnDelete="@(() => DeleteCategory(category.Id))" />
+            <CategoryCard CurrentCategory="@category"
+                          OnDelete="@(() => DeleteCategory(category.Id))"
+                          OnEdit="OpenEditModal"/>
         }
     </div>
 
-@*     <CategoryModal IsVisible="@showModal"
-                   IsEditing="@isEditing"
-                   Category="@currentCategory"
+    <CategoryModal IsVisible="@ShowModal"
+                   Model="@CurrentCategory"
                    OnClose="@CloseModal"
-                   OnSave="@SaveCategory" /> *@
+                   OnSave="@SaveCategory" />
 </div>
 
 @code {
     /// <summary>
     /// Indica si debe mostar el modal
     /// </summary>
-    private bool showModal = false;
+    private bool ShowModal = false;
+
+    /// <summary>
+    ///
+    /// </summary>
+    private ModalOperation ModalOperation = ModalOperation.Create;
+
+    /// <summary>
+    ///
+    /// </summary>
+    private CategoryModalVM CurrentCategory = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,19 +61,45 @@
 
     private void OpenAddModal()
     {
+        ModalOperation = ModalOperation.Create;
+        ShowModal = true;
     }
 
-    private void OpenEditModal(CategoryModel category)
+    private void OpenEditModal(Guid id)
     {
+        ModalOperation = ModalOperation.Edit;
+
+        CategoryModel? categoryFound = CategoryState.Categories.SingleOrDefault(e => e.Id == id);
+
+        if (categoryFound != null)
+        {
+            CurrentCategory = new()
+            {
+                Id = categoryFound.Id,
+                Name = categoryFound.Name.Name,
+                Color = categoryFound.Color.Color,
+                Icon = categoryFound.Icon.Source
+            };
+
+            ShowModal = true;
+        }
     }
 
     private void CloseModal()
     {
-        showModal = false;
+        ShowModal = false;
     }
 
-    private async Task SaveCategory(CategoryModel category)
+    private async Task SaveCategory(CategoryModalVM category)
     {
+        if(ModalOperation == ModalOperation.Edit)
+        {
+            await CategoryService.UpdateCategoryAsync(id: category.Id!.Value, name: category.Name, colorHex: category.Color, iconSource: category.Icon);
+        }
+        if (ModalOperation == ModalOperation.Create)
+        {
+            await CategoryService.CreateCategoryAsync(name: category.Name, colorHex: category.Color, iconSource: category.Icon);
+        }
         CloseModal();
     }
 

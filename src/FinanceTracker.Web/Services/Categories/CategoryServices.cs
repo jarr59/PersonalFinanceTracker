@@ -11,7 +11,7 @@ namespace FinanceTracker.Web.Services.Categories;
 /// Service for managing category operations using CQRS pattern.
 /// Encapsulates all category-related business logic and state management.
 /// </summary>
-public class CategoryService(IMediator mediator, CategoryState _categoryState)
+public class CategoryServices(IMediator mediator, CategoryState _categoryState) : ICategoryServices
 {
     /// <summary>
     /// Creates a new category and updates the state.

@@ -28,33 +28,29 @@ public class Mediator(IServiceProvider provider) : IMediator
     /// <returns>Resultado de la ejecución del command</returns>
     public async Task<TResult> SendCommandAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken = default) where TCommand : ICustomCommand<TResult>
     {
-        // PASO 1: Resolver el handler específico para este command usando el ServiceProvider
-        // El DI container busca una implementación de ICommandHandler<TCommand, TResult>
-        var handler = provider.GetService<ICustomCommandHandler<TCommand, TResult>>();
-        if (handler == null)
+        var handlers = provider.GetServices<ICustomCommandHandler<TCommand, TResult>>().ToList();
+        if (handlers.Count == 0)
         {
-            // Si no encuentra handler, lanza excepción - esto indica configuración incorrecta
             throw new InvalidOperationException($"No handler registered for {typeof(TCommand).Name}");
         }
 
-        // PASO 2: Obtener todos los behaviors registrados para crear un pipeline
-        // Los behaviors permiten cross-cutting concerns como logging, validación, caching, etc.
-        // Se invierten para ejecutar en el orden correcto (último registrado se ejecuta primero)
+        if (handlers.Count > 1)
+        {
+            throw new InvalidOperationException($"Multiple handlers registered for {typeof(TCommand).Name}");
+        }
+
+        var handler = handlers[0];
+
         var behaviors = provider.GetServices<IPipelineBehavior<TCommand, TResult>>().Reverse();
 
-        // PASO 3: Construir la cadena de responsabilidad (Chain of Responsibility pattern)
-        // Comenzamos con el handler final que ejecutará la lógica de negocio
         Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(command, cancellationToken);
-        
-        // PASO 4: Envolver cada behavior alrededor del handler
-        // Cada behavior puede ejecutar lógica antes y después del siguiente en la cadena
+
         foreach (var behavior in behaviors)
         {
-            var next = handlerDelegate; // Capturar la referencia actual
+            var next = handlerDelegate;
             handlerDelegate = () => behavior.HandleAsync(command, next, cancellationToken);
         }
 
-        // PASO 5: Ejecutar toda la cadena de behaviors + handler
         return await handlerDelegate();
     }
 
@@ -74,32 +70,29 @@ public class Mediator(IServiceProvider provider) : IMediator
     /// <returns>Resultado de la ejecución de la query</returns>
     public async Task<TResult> SendQueryAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = default) where TQuery : ICustomQuery<TResult>
     {
-        // PASO 1: Resolver el handler específico para esta query usando el ServiceProvider
-        // El DI container busca una implementación de IQueryHandler<TQuery, TResult>
-        var handler = provider.GetService<ICustomQueryHandler<TQuery, TResult>>();
-        if (handler == null)
+        var handlers = provider.GetServices<ICustomQueryHandler<TQuery, TResult>>().ToList();
+        if (handlers.Count == 0)
         {
-            // Si no encuentra handler, lanza excepción - esto indica configuración incorrecta
             throw new InvalidOperationException($"No handler registered for {typeof(TQuery).Name}");
         }
 
-        // PASO 2: Obtener todos los behaviors registrados para crear un pipeline
-        // Para queries, los behaviors típicos incluyen: caching, logging, autorización
-        // Se invierten para ejecutar en el orden correcto
+        if (handlers.Count > 1)
+        {
+            throw new InvalidOperationException($"Multiple handlers registered for {typeof(TQuery).Name}");
+        }
+
+        var handler = handlers[0];
+
         var behaviors = provider.GetServices<IPipelineBehavior<TQuery, TResult>>().Reverse();
-        
-        // PASO 3: Construir la cadena de responsabilidad comenzando con el handler final
+
         Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(query, cancellationToken);
-        
-        // PASO 4: Envolver cada behavior alrededor del handler
-        // Ejemplo: CachingBehavior -> LoggingBehavior -> AuthorizationBehavior -> Handler
+
         foreach (var behavior in behaviors)
         {
-            var next = handlerDelegate; // Capturar la referencia actual
+            var next = handlerDelegate;
             handlerDelegate = () => behavior.HandleAsync(query, next, cancellationToken);
         }
 
-        // PASO 5: Ejecutar toda la cadena de behaviors + handler
         return await handlerDelegate();
     }
 }

@@ -1,51 +1,88 @@
-@* @using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.Components.Categories.ViewModels
+@using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.States.Categories.DTOs
 
 <Modal IsVisible="@IsVisible"
        Title="@GetTitle()"
        OnClose="@OnClose"
        OnSave="@HandleSave">
-    <div class="form-group">
-        <label>Nombre</label>
-        <input type="text" class="form-input" @bind="Category.Name" placeholder="Ej: Alimentación" />
-    </div>
-    <div class="form-group">
-        <label>Color (Hex)</label>
-        <input type="text" class="form-input" @bind="Category.Color" placeholder="#22c55e" />
-    </div>
-    <div class="form-group">
-        <label>Icono (Material Icon)</label>
-        <input type="text" class="form-input" @bind="Category.Icon" placeholder="restaurant" />
-        <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 5px;">
-            Ver iconos en: <a href="https://fonts.google.com/icons" target="_blank" style="color: var(--accent-blue);">Google Material Icons</a>
-        </small>
-    </div>
-    <div class="form-group">
-        <label>Vista Previa</label>
-        <div class="category-preview" style="background: @(Category.Color)22; color: @Category.Color; border: 2px solid @Category.Color;">
-            <span class="material-icons" style="font-size: 32px;">@Category.Icon</span>
-            <span style="font-weight: 600; margin-left: 10px;">@Category.Name</span>
+
+    <EditForm Model="Model" @ref="EditForm">
+        <div class="form-group">
+            <label>Nombre</label>
+            <InputText @bind-Value="Model.Name" class="form-input" placeholder="Ej: Alimentación" />
         </div>
-    </div>
+        <div class="form-group">
+            <label>Color (Hex)</label>
+            <InputText @bind-Value="Model.Color" class="form-input" placeholder="#22c55e" />
+        </div>
+        <div class="form-group">
+            <label>Icono (Material Icon)</label>
+            <InputText @bind-Value="Model.Icon" class="form-input" placeholder="#22c55e" />
+        </div>
+        @* <div class="form-group">
+            <label>Vista Previa</label>
+            <div class="category-preview" style="background: @(Model.Color)22; color: @Model.Color; border: 2px solid @Model.Color;">
+                <span class="material-icons" style="font-size: 32px;">@Model.Icon</span>
+                <span style="font-weight: 600; margin-left: 10px;">@Model.Name</span>
+            </div>
+        </div> *@
+    </EditForm>
+
 </Modal>
 
 @code {
-    [Parameter] public bool IsVisible { get; set; }
-    [Parameter] public bool IsEditing { get; set; }
-    [Parameter] public CategoryModel Category { get; set; } = new();
-    [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback<CategoryModel> OnSave { get; set; }
+    /// <summary>
+    /// Representa el modelo de la categoría que se está creando o editando
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public CategoryModalVM Model { get; set; }
 
-    private string GetTitle()
-    {
-        return IsEditing ? "Editar Categoría" : "Nueva Categoría";
-    }
+    /// <summary>
+    /// Indica si debe mostar el modal
+    /// </summary>
+    [Parameter]
+    public bool IsVisible { get; set; }
 
+    /// <summary>
+    /// Indica si se está editando una categoría existente
+    /// </summary>
+    [Parameter]
+    public bool IsEditing { get; set; }
+
+    /// <summary>
+    /// Evento que se dispara al cerrar el modal
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    /// <summary>
+    /// Evento que se dispara al guardar la categoría
+    /// </summary>
+    [Parameter]
+    public EventCallback<CategoryModalVM> OnSave { get; set; }
+
+    /// <summary>
+    /// Referencia al formulario
+    /// </summary>
+    EditForm? EditForm = null;
+
+    /// <summary>
+    /// Muestra el título adecuado según si se está editando o creando una categoría
+    /// </summary>
+    /// <returns></returns>
+    private string GetTitle() => IsEditing ? "Editar Categoría" : "Nueva Categoría";
+
+    /// <summary>
+    /// Encargado de manejar el guardado de la categoría
+    /// </summary>
+    /// <returns></returns>
     private async Task HandleSave()
     {
-        if (string.IsNullOrWhiteSpace(Category.Name))
-            return;
-
-        await OnSave.InvokeAsync(Category);
+        if (EditForm?.EditContext?.Validate() == true)
+        {
+            await OnSave.InvokeAsync(Model);
+        }
     }
 }
- *@

@@ -16,6 +16,6 @@ internal class UnitOfWork(FinanceTrackerDbContext dbContext) : IUnitOfWork
     /// </summary>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the save operation.</param>
     /// <returns>A task that represents the asynchronous save operation.</returns>
-    public async Task SaveChanges(CancellationToken cancellationToken = default) =>
-        await dbContext.SaveChangesAsync(cancellationToken);
+    public async Task SaveChanges() =>
+        await dbContext.SaveChangesAsync();
 }

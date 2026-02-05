@@ -13,7 +13,7 @@ public class CreateCategoryCommandHandler(ICategoryRepository _repository, IUnit
     {
         var category = new Category(new NameVO(command.Name), new ColorVO(command.ColorHex), new IconVO(command.IconSource));
         await _repository.Add(category);
-        await _unitOfWork.SaveChanges(cancellationToken);
+        await _unitOfWork.SaveChanges();
         return category;
     }
 }

@@ -1,16 +1,28 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@inherits LayoutComponentBase
 
-<ErrorBoundary Context="ex" @ref="ErrorBoundary">
+<FluentToastProvider />
+<FluentDialogProvider />
+<FluentTooltipProvider />
+<FluentMessageBarProvider />
+<FluentMenuProvider />
+
+<AppErrorBoundary @ref="ErrorBoundary">
     <ChildContent>
         <div id="app">
             @Body
         </div>
     </ChildContent>
     <ErrorContent >
-        <ErrorBoundaryAlert ErrorBoundary="ErrorBoundary"></ErrorBoundaryAlert>
+        <ErrorBoundaryAlert Reset="ResetErrorBoundary" />
     </ErrorContent>
-</ErrorBoundary>
+</AppErrorBoundary>
 
 @code {
-    ErrorBoundary ErrorBoundary;
+    ErrorBoundary? ErrorBoundary;
+
+    /// <summary>
+    /// Resetea el ErrorBoundary para intentar renderizar nuevamente el contenido.
+    /// </summary>
+    private void ResetErrorBoundary() => ErrorBoundary?.Recover();
 }

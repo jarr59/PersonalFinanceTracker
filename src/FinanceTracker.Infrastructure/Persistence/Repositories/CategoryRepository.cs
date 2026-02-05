@@ -20,16 +20,6 @@ internal class CategoryRepository(FinanceTrackerDbContext dbContext) : ICategory
     }
 
     /// <summary>
-    /// Updates a category in the database context.
-    /// </summary>
-    /// <param name="category">The category to update.</param>
-    public Task Update(Category category)
-    {
-        dbContext.Categories.Update(category);
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
     /// Retrieves a category by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the category.</param>
@@ -46,5 +36,14 @@ internal class CategoryRepository(FinanceTrackerDbContext dbContext) : ICategory
     public async Task<List<Category>> GetAll()
     {
         return await dbContext.Categories.ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieves all categories from the database.
+    /// </summary>
+    /// <returns>A list of all categories.</returns>
+    public async Task SaveChanges()
+    {
+        await dbContext.SaveChangesAsync();
     }
 }

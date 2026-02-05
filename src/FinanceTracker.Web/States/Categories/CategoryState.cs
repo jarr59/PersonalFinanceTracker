@@ -9,10 +9,18 @@ public sealed class CategoryState : StateContainerBase
     /// </summary>
     public List<CategoryModel> Categories { get; private set; } = [];
 
+    /// <summary>
+    /// Indica si las categorias han sido cargadas
+    /// </summary>
+    public bool IsLoading { get; private set; } = false;
+
     public void AddCategory(List<CategoryModel> categories)
     {
+        SetIsLoading();
+
         Categories.AddRange(categories);
-        NotifyStateChanged();
+
+        SetIsLoading();
     }
 
     public void UpdateCategory(CategoryModel category)
@@ -20,10 +28,12 @@ public sealed class CategoryState : StateContainerBase
         CategoryModel? existing = Categories.FirstOrDefault(c => c.Id == category.Id);
         if (existing != null)
         {
+            SetIsLoading();
             existing.Name = category.Name;
             existing.Color = category.Color;
             existing.Icon = category.Icon;
-            NotifyStateChanged();
+            SetIsLoading();
+
         }
     }
 
@@ -32,14 +42,22 @@ public sealed class CategoryState : StateContainerBase
         CategoryModel? category = Categories.FirstOrDefault(c => c.Id == id);
         if (category != null)
         {
+            SetIsLoading();
             Categories.Remove(category);
-            NotifyStateChanged();
+            SetIsLoading();
         }
     }
 
     public void CleanCategories()
     {
+        SetIsLoading();
         Categories.Clear();
+        SetIsLoading();
+    }
+
+    private void SetIsLoading()
+    {
+        IsLoading = IsLoading != true;
         NotifyStateChanged();
     }
 }
