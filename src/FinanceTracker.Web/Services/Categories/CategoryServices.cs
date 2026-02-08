@@ -24,8 +24,6 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
         
         _categoryState.AddCategory([CategoryModel.FromDomain(result)]);
 
-        await Task.Delay(1000);
-
         _categoryState.SetIsAdding();
     }
 
@@ -40,8 +38,6 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
 
         _categoryState.UpdateCategory(CategoryModel.FromDomain(result));
 
-        await Task.Delay(1000);
-
         _categoryState.SetIsUpdating();
     }
 
@@ -55,8 +51,6 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
         List<Category> result = await mediator.SendQueryAsync<GetAllCategoriesQuery, List<Category>>(new GetAllCategoriesQuery());
 
         _categoryState.CleanCategories();
-
-        await Task.Delay(1000);
 
         _categoryState.AddCategory([.. result.Select(CategoryModel.FromDomain)]);
 
@@ -73,8 +67,6 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
         await mediator.SendCommandAsync<DeleteCategoryCommand, bool>(new DeleteCategoryCommand(id));
 
         _categoryState.DeleteCategory(id);
-
-        await Task.Delay(1000);
 
         _categoryState.SetIsDeleting();
     }
