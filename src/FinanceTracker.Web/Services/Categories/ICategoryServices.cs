@@ -20,8 +20,8 @@
 
         /// <summary>
         /// Elimina una categoría del estado de categorías utilizando su id. 
-        /// Nota: Para eliminar la categoría del repositorio, se debe implementar un comando de eliminación en la capa de aplicación y llamar a ese comando desde este método.
         /// </summary>
-        void DeleteCategory(Guid id);
+        /// Implementa el comando de eliminación en la capa de aplicación y lo ejecuta.
+        Task DeleteCategoryAsync(Guid id);
     }
 }

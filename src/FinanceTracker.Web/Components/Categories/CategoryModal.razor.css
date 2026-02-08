@@ -5,3 +5,19 @@
     align-items: center;
     justify-content: center;
 }
+
+.form-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.form-hint a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.form-hint a:hover {
+    text-decoration: underline;
+}

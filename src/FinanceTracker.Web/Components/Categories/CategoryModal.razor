@@ -1,32 +1,66 @@
 @using FinanceTracker.Web.Components.Categories.ViewModels
 @using FinanceTracker.Web.States.Categories
 @using FinanceTracker.Web.States.Categories.DTOs
+@using Radzen.Blazor
 
 <Modal IsVisible="@IsVisible"
        Title="@GetTitle()"
        OnClose="@OnClose"
-       OnSave="@HandleSave">
+       OnSave="@HandleSave"
+       SaveText="@(IsSaving ? "Guardando..." : "Guardar")">
 
     <EditForm Model="Model" @ref="EditForm">
         <div class="form-group">
             <label>Nombre</label>
-            <InputText @bind-Value="Model.Name" class="form-input" placeholder="Ej: Alimentación" />
+            <InputText @bind-Value="Model.Name" class="form-input" placeholder="Ej: Alimentación" disabled="@IsSaving" />
         </div>
         <div class="form-group">
-            <label>Color (Hex)</label>
-            <InputText @bind-Value="Model.Color" class="form-input" placeholder="#22c55e" />
+            <label>Color</label>
+            <RadzenColorPicker @bind-Value="@Model.Color" 
+                              ShowHSV="true" 
+                              ShowRGBA="true" 
+                              ShowColors="true" 
+                              ShowButton="true"
+                              Disabled="@IsSaving"
+                              Style="width: 100%;" />
         </div>
         <div class="form-group">
-            <label>Icono (Material Icon)</label>
-            <InputText @bind-Value="Model.Icon" class="form-input" placeholder="#22c55e" />
+            <label>Icono</label>
+            <select @bind="SelectedIconOption" @bind:after="OnIconSelectionChanged" class="form-input" disabled="@IsSaving">
+                <option value="">Selecciona un icono</option>
+                @foreach (var icon in PredefinedIcons)
+                {
+                    <option value="@icon.Value">
+                        @icon.Label
+                    </option>
+                }
+                <option value="custom">?? Otros (personalizado)</option>
+            </select>
         </div>
-        @* <div class="form-group">
-            <label>Vista Previa</label>
-            <div class="category-preview" style="background: @(Model.Color)22; color: @Model.Color; border: 2px solid @Model.Color;">
-                <span class="material-icons" style="font-size: 32px;">@Model.Icon</span>
-                <span style="font-weight: 600; margin-left: 10px;">@Model.Name</span>
+
+        @if (SelectedIconOption == "custom")
+        {
+            <div class="form-group">
+                <label>Icono personalizado (Material Icon)</label>
+                <InputText @bind-Value="Model.Icon" class="form-input" placeholder="Ej: restaurant" disabled="@IsSaving" />
+                <small class="form-hint">
+                    <a href="https://fonts.google.com/icons?icon.set=Material+Icons" target="_blank" rel="noopener">
+                        Ver iconos disponibles
+                    </a>
+                </small>
             </div>
-        </div> *@
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Name) && !string.IsNullOrWhiteSpace(Model.Color) && !string.IsNullOrWhiteSpace(Model.Icon))
+        {
+            <div class="form-group">
+                <label>Vista Previa</label>
+                <div class="category-preview" style="background: @(Model.Color)22; color: @Model.Color; border: 2px solid @Model.Color;">
+                    <span class="material-icons" style="font-size: 32px;">@Model.Icon</span>
+                    <span style="font-weight: 600; margin-left: 10px;">@Model.Name</span>
+                </div>
+            </div>
+        }
     </EditForm>
 
 </Modal>
@@ -52,6 +86,12 @@
     public bool IsEditing { get; set; }
 
     /// <summary>
+    /// Indica si se está guardando la categoría
+    /// </summary>
+    [Parameter]
+    public bool IsSaving { get; set; }
+
+    /// <summary>
     /// Evento que se dispara al cerrar el modal
     /// </summary>
     [Parameter]
@@ -68,6 +108,27 @@
     /// </summary>
     EditForm? EditForm = null;
 
+    private string SelectedIconOption { get; set; } = "";
+
+    private List<(string Value, string Label)> PredefinedIcons = new()
+    {
+        ("restaurant", "?? Restaurantes / Comida"),
+        ("shopping_cart", "?? Supermercado"),
+        ("local_gas_station", "? Gasolina / Combustible"),
+        ("home", "?? Hogar / Vivienda"),
+        ("directions_car", "?? Transporte / Auto"),
+        ("health_and_safety", "?? Salud / Médico"),
+        ("school", "?? Educación"),
+        ("shopping_bag", "?? Ropa / Tiendas"),
+        ("sports_esports", "?? Entretenimiento"),
+        ("phone_android", "?? Tecnología"),
+        ("flight", "?? Viajes"),
+        ("fitness_center", "?? Gimnasio / Deporte"),
+        ("pets", "?? Mascotas"),
+        ("build", "?? Herramientas / Mantenimiento"),
+        ("card_giftcard", "?? Regalos")
+    };
+
     /// <summary>
     /// Muestra el título adecuado según si se está editando o creando una categoría
     /// </summary>
@@ -80,9 +141,43 @@
     /// <returns></returns>
     private async Task HandleSave()
     {
+        if (IsSaving) return;
+
         if (EditForm?.EditContext?.Validate() == true)
         {
             await OnSave.InvokeAsync(Model);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Si el modelo tiene un icono, determinar si está en la lista predefinida
+        if (!string.IsNullOrWhiteSpace(Model.Icon))
+        {
+            var predefinedIcon = PredefinedIcons.FirstOrDefault(i => i.Value == Model.Icon);
+            SelectedIconOption = predefinedIcon != default ? Model.Icon : "custom";
+        }
+        else
+        {
+            SelectedIconOption = "";
+        }
+
+        base.OnParametersSet();
+    }
+
+    private void OnIconSelectionChanged()
+    {
+        if (SelectedIconOption != "custom" && !string.IsNullOrWhiteSpace(SelectedIconOption))
+        {
+            Model.Icon = SelectedIconOption;
+        }
+        else if (SelectedIconOption == "custom")
+        {
+            // Si selecciona "otros", limpia el icono actual para que el usuario ingrese uno
+            if (PredefinedIcons.Any(i => i.Value == Model.Icon))
+            {
+                Model.Icon = "";
+            }
         }
     }
 }

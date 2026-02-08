@@ -10,17 +10,33 @@ public sealed class CategoryState : StateContainerBase
     public List<CategoryModel> Categories { get; private set; } = [];
 
     /// <summary>
-    /// Indica si las categorias han sido cargadas
+    /// Indica si las categorias están siendo cargadas
     /// </summary>
     public bool IsLoading { get; private set; } = false;
 
+    /// <summary>
+    /// Indica si se está agregando una categoría
+    /// </summary>
+    public bool IsAdding { get; private set; } = false;
+
+    /// <summary>
+    /// Indica si se está actualizando una categoría
+    /// </summary>
+    public bool IsUpdating { get; private set; } = false;
+
+    /// <summary>
+    /// Indica si se está eliminando una categoría
+    /// </summary>
+    public bool IsDeleting { get; private set; } = false;
+
+    /// <summary>
+    /// Indica si hay alguna operación en curso
+    /// </summary>
+    public bool IsBusy => IsLoading || IsAdding || IsUpdating || IsDeleting;
+
     public void AddCategory(List<CategoryModel> categories)
     {
-        SetIsLoading();
-
         Categories.AddRange(categories);
-
-        SetIsLoading();
     }
 
     public void UpdateCategory(CategoryModel category)
@@ -28,12 +44,9 @@ public sealed class CategoryState : StateContainerBase
         CategoryModel? existing = Categories.FirstOrDefault(c => c.Id == category.Id);
         if (existing != null)
         {
-            SetIsLoading();
             existing.Name = category.Name;
             existing.Color = category.Color;
             existing.Icon = category.Icon;
-            SetIsLoading();
-
         }
     }
 
@@ -42,22 +55,42 @@ public sealed class CategoryState : StateContainerBase
         CategoryModel? category = Categories.FirstOrDefault(c => c.Id == id);
         if (category != null)
         {
-            SetIsLoading();
             Categories.Remove(category);
-            SetIsLoading();
         }
     }
 
     public void CleanCategories()
     {
-        SetIsLoading();
         Categories.Clear();
-        SetIsLoading();
     }
 
-    private void SetIsLoading()
+    public void SetIsLoading()
     {
-        IsLoading = IsLoading != true;
+        IsLoading = !IsLoading;
+        NotifyStateChanged();
+    }
+
+    public void SetIsAdding()
+    {
+        IsAdding = !IsAdding;
+        NotifyStateChanged();
+    }
+
+    public void SetIsUpdating()
+    {
+        IsUpdating = !IsUpdating;
+        NotifyStateChanged();
+    }
+
+    public void SetIsDeleting()
+    {
+        IsDeleting = !IsDeleting;
+        NotifyStateChanged();
+    }
+
+    public void SetIsBusy()
+    {
+        IsLoading = !IsLoading;
         NotifyStateChanged();
     }
 }

@@ -6,7 +6,7 @@
         <div class="modal-content @(Size == ModalSize.Small ? "modal-small" : "")" @onclick:stopPropagation="true">
             <div class="modal-header">
                 <h2>@Title</h2>
-                <button class="btn-close" @onclick="OnClose">
+                <button class="btn-close" @onclick="OnClose" disabled="@IsLoading">
                     <span class="material-icons">close</span>
                 </button>
             </div>
@@ -22,8 +22,14 @@
                     }
                     else
                     {
-                        <button class="btn-secondary" @onclick="OnClose">@CancelText</button>
-                        <button class="btn-primary" @onclick="OnSave">@SaveText</button>
+                        <button class="btn-secondary" @onclick="OnClose" disabled="@IsLoading">@CancelText</button>
+                        <button class="btn-primary" @onclick="OnSave" disabled="@IsLoading">
+                            @if (IsLoading)
+                            {
+                                <span class="spinner-small"></span>
+                            }
+                            @SaveText
+                        </button>
                     }
                 </div>
             }
@@ -43,10 +49,11 @@
     [Parameter] public string CancelText { get; set; } = "Cancelar";
     [Parameter] public ModalSize Size { get; set; } = ModalSize.Normal;
     [Parameter] public bool CloseOnOverlayClick { get; set; } = true;
+    [Parameter] public bool IsLoading { get; set; } = false;
 
     private async Task OnOverlayClick()
     {
-        if (CloseOnOverlayClick)
+        if (CloseOnOverlayClick && !IsLoading)
         {
             await OnClose.InvokeAsync();
         }

@@ -46,4 +46,13 @@ internal class CategoryRepository(FinanceTrackerDbContext dbContext) : ICategory
     {
         await dbContext.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Elimina una categoría del contexto (no persiste los cambios).
+    /// </summary>
+    public async Task Delete(Category category)
+    {
+        dbContext.Categories.Remove(category);
+        await Task.CompletedTask;
+    }
 }

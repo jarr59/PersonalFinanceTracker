@@ -1,22 +1,16 @@
 @using FinanceTracker.Web.States.Categories
 @using FinanceTracker.Web.States.Categories.DTOs
 
-<div class="category-card" style="border-left: 4px solid @CurrentCategory.Color.Color;">
-    <div class="category-icon" style="background: @(CurrentCategory.Color.Color)22; color: @CurrentCategory.Color.Color;">
-        <span class="material-icons">@CurrentCategory.Icon.Source</span>
-    </div>
-    <div class="category-info">
-        <h3 class="category-name">@CurrentCategory.Name.Name</h3>
-        <div class="category-meta">
-            <span class="category-color" style="background: @CurrentCategory.Color.Color;"></span>
-            <span class="category-color-code">@CurrentCategory.Color.Color</span>
-        </div>
+<div class="category-card" style="background: @(CurrentCategory.Color.Color)22; color: @CurrentCategory.Color.Color; border: 2px solid @CurrentCategory.Color.Color;">
+    <div class="category-content">
+        <span class="material-icons category-icon">@CurrentCategory.Icon.Source</span>
+        <span class="category-name">@CurrentCategory.Name.Name</span>
     </div>
     <div class="category-actions">
-        <button class="btn-icon" @onclick="HandleEdit">
+        <button class="btn-icon" @onclick="HandleEdit" title="Editar">
             <span class="material-icons">edit</span>
         </button>
-        <button class="btn-icon btn-danger" @onclick="HandleDelete">
+        <button class="btn-icon btn-danger" @onclick="HandleDelete" title="Eliminar">
             <span class="material-icons">delete</span>
         </button>
     </div>

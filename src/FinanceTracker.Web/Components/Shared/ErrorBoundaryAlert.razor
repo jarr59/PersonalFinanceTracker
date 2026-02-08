@@ -1,6 +1,5 @@
 ﻿@using FinanceTracker.Web.States.Errors
-@using Microsoft.FluentUI.AspNetCore.Components
-@inject IToastService ToastService
+
 @inject ErrorState ErrorState
 @inherits StateAwareComponent
 
@@ -16,7 +15,7 @@
     {
         foreach (var error in ErrorState.Errors)
         {
-            ToastService.ShowError(error);
+            // ToastService.ShowError(error);
         }
         await Reset.InvokeAsync();
         await base.OnInitializedAsync();

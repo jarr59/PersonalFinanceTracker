@@ -18,9 +18,15 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
     /// </summary>
     public async Task CreateCategoryAsync(string name, string colorHex, string iconSource)
     {
+        _categoryState.SetIsAdding();
+
         Category result = await mediator.SendCommandAsync<CreateCategoryCommand, Category>(new CreateCategoryCommand(name, colorHex, iconSource));
         
         _categoryState.AddCategory([CategoryModel.FromDomain(result)]);
+
+        await Task.Delay(1000);
+
+        _categoryState.SetIsAdding();
     }
 
     /// <summary>
@@ -28,9 +34,15 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
     /// </summary>
     public async Task UpdateCategoryAsync(Guid id, string name, string colorHex, string iconSource)
     {
+        _categoryState.SetIsUpdating();
+
         Category result = await mediator.SendCommandAsync<UpdateCategoryCommand, Category>(new UpdateCategoryCommand(id, name, colorHex, iconSource));
 
         _categoryState.UpdateCategory(CategoryModel.FromDomain(result));
+
+        await Task.Delay(1000);
+
+        _categoryState.SetIsUpdating();
     }
 
     /// <summary>
@@ -38,18 +50,32 @@ public class CategoryServices(IMediator mediator, CategoryState _categoryState) 
     /// </summary>
     public async Task LoadAllCategories()
     {
+        _categoryState.SetIsLoading();
+
         List<Category> result = await mediator.SendQueryAsync<GetAllCategoriesQuery, List<Category>>(new GetAllCategoriesQuery());
 
         _categoryState.CleanCategories();
+
+        await Task.Delay(1000);
+
         _categoryState.AddCategory([.. result.Select(CategoryModel.FromDomain)]);
+
+        _categoryState.SetIsLoading();
     }
 
     /// <summary>
-    /// Deletes a category from the state.
-    /// Note: Implement delete command in Application layer for repository deletion.
+    /// Deletes a category using application command and updates the state.
     /// </summary>
-    public void DeleteCategory(Guid id)
+    public async Task DeleteCategoryAsync(Guid id)
     {
+        _categoryState.SetIsDeleting();
+
+        await mediator.SendCommandAsync<DeleteCategoryCommand, bool>(new DeleteCategoryCommand(id));
+
         _categoryState.DeleteCategory(id);
+
+        await Task.Delay(1000);
+
+        _categoryState.SetIsDeleting();
     }
 }

@@ -5,3 +5,33 @@
     margin-top: 20px;
 }
 
+.categories-container {
+    position: relative;
+    min-height: 60vh;
+}
+
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+}
+
+.action-overlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+

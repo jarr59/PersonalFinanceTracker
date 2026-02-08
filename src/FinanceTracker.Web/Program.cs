@@ -11,7 +11,7 @@ using FinanceTracker.Web.States.Accounts;
 using FinanceTracker.Web.States.Categories;
 using FinanceTracker.Web.States.Errors;
 using FinanceTracker.Web.States.Transactions;
-using Microsoft.FluentUI.AspNetCore.Components;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +36,7 @@ builder.Services.AddScoped<CategoryState>();
 builder.Services.AddScoped<AccountState>();
 builder.Services.AddScoped<TransactionState>();
 
-builder.Services.AddFluentUIComponents();
+builder.Services.AddRadzenComponents();
 
 
 var app = builder.Build();

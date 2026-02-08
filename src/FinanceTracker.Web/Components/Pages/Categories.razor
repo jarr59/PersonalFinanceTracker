@@ -4,6 +4,8 @@
 @using FinanceTracker.Web.Components.Categories
 @using FinanceTracker.Web.Services.Categories
 @using FinanceTracker.Web.States.Categories.DTOs
+@using Radzen
+@using Radzen.Blazor
 @using static FinanceTracker.Web.Components.Shared.Modal
 @inject CategoryState CategoryState
 @inject ICategoryServices CategoryService
@@ -16,57 +18,76 @@
 
     <div class="page-header">
         <h1 class="page-title">Categorías</h1>
-        <button class="btn-primary" @onclick="OpenAddModal">
+        <button class="btn-primary" @onclick="OpenAddModal" disabled="@CategoryState.IsBusy">
             <span class="material-icons">add</span> Nueva Categoría
         </button>
     </div>
 
-    <div class="categories-grid">
-        @foreach (var category in CategoryState.Categories)
+    <div class="categories-container">
+        @if (CategoryState.IsLoading)
         {
-            <CategoryCard CurrentCategory="@category"
-                          OnDelete="@(() => DeleteCategory(category.Id))"
-                          OnEdit="OpenEditModal"/>
+            <div class="loading-overlay" role="status" aria-label="Cargando categorías">
+                <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large">
+                    <Template>Cargando categorías...</Template>
+                </RadzenProgressBarCircular>
+            </div>
         }
+
+        @if (CategoryState.IsDeleting)
+        {
+            <div class="action-overlay" role="status" aria-label="Eliminando categoría">
+                <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium">
+                    <Template>Eliminando...</Template>
+                </RadzenProgressBarCircular>
+            </div>
+        }
+
+        <div class="categories-grid">
+            @if (!CategoryState.IsLoading)
+            {
+                @foreach (var category in CategoryState.Categories)
+                {
+                    <CategoryCard CurrentCategory="@category"
+                                  OnDelete="@(() => DeleteCategory(category.Id))"
+                                  OnEdit="OpenEditModal" />
+                }
+            }
+        </div>
     </div>
 
     <CategoryModal IsVisible="@ShowModal"
                    Model="@CurrentCategory"
+                   IsEditing="@(ModalOperation == ModalOperation.Edit)"
                    OnClose="@CloseModal"
-                   OnSave="@SaveCategory" />
+                   OnSave="@SaveCategory"
+                   IsSaving="@(CategoryState.IsAdding || CategoryState.IsUpdating)" />
 </div>
 
 @code {
-    /// <summary>
-    /// Indica si debe mostar el modal
-    /// </summary>
     private bool ShowModal = false;
-
-    /// <summary>
-    ///
-    /// </summary>
     private ModalOperation ModalOperation = ModalOperation.Create;
-
-    /// <summary>
-    ///
-    /// </summary>
     private CategoryModalVM CurrentCategory = new();
 
     protected override async Task OnInitializedAsync()
     {
-        Subscribe(CategoryState);
+        await Subscribe(CategoryState);
         await CategoryService.LoadAllCategories();
         await base.OnInitializedAsync();
     }
 
     private void OpenAddModal()
     {
+        if (CategoryState.IsBusy) return;
+        
         ModalOperation = ModalOperation.Create;
+        CurrentCategory = new();
         ShowModal = true;
     }
 
     private void OpenEditModal(Guid id)
     {
+        if (CategoryState.IsBusy) return;
+        
         ModalOperation = ModalOperation.Edit;
 
         CategoryModel? categoryFound = CategoryState.Categories.SingleOrDefault(e => e.Id == id);
@@ -80,33 +101,39 @@
                 Color = categoryFound.Color.Color,
                 Icon = categoryFound.Icon.Source
             };
-
             ShowModal = true;
         }
     }
 
     private void CloseModal()
     {
+        if (CategoryState.IsAdding || CategoryState.IsUpdating) return;
+        
         ShowModal = false;
+        CurrentCategory = new();
     }
 
     private async Task SaveCategory(CategoryModalVM category)
     {
-        if(ModalOperation == ModalOperation.Edit)
+        if (CategoryState.IsAdding || CategoryState.IsUpdating) return;
+        
+        if (ModalOperation == ModalOperation.Edit)
         {
             await CategoryService.UpdateCategoryAsync(id: category.Id!.Value, name: category.Name, colorHex: category.Color, iconSource: category.Icon);
         }
-        if (ModalOperation == ModalOperation.Create)
+        else if (ModalOperation == ModalOperation.Create)
         {
             await CategoryService.CreateCategoryAsync(name: category.Name, colorHex: category.Color, iconSource: category.Icon);
         }
+        
         CloseModal();
     }
 
-    private void DeleteCategory(Guid id)
+    private async Task DeleteCategory(Guid id)
     {
-        // Por ahora, solo eliminar del estado (implementar DeleteCategoryCommand después)
-        CategoryService.DeleteCategory(id);
+        if (CategoryState.IsDeleting) return;
+        
+        await CategoryService.DeleteCategoryAsync(id);
     }
 }
 
