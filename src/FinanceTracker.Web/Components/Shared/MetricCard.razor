@@ -1,0 +1,25 @@
+@* Metric Card Component *@
+
+<div class="metric-card">
+    <div class="metric-card-content">
+        <p class="metric-label">@Label</p>
+        <h3 class="metric-value">@Value</h3>
+    </div>
+    @if (!string.IsNullOrEmpty(ChartUrl))
+    {
+        <div class="metric-chart">
+            <img src="@ChartUrl" alt="chart" class="chart-img" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Label";
+
+    [Parameter]
+    public string Value { get; set; } = "$0.00";
+
+    [Parameter]
+    public string ChartUrl { get; set; } = string.Empty;
+}

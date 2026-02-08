@@ -5,14 +5,29 @@ namespace FinanceTracker.Web.Components.Shared;
 
 public abstract class StateAwareComponent : ComponentBase, IDisposable
 {
-    private readonly List<IStateContainer> _subscriptions = new();
+    private readonly List<(IStateContainer State, Action Handler)> _subscriptions = [];
     private bool _disposed;
 
-    protected void Subscribe(IStateContainer state)
+    protected async Task Subscribe(IStateContainer state, Func<Task>? onChangeCallback = null)
     {
-        state.OnChange += StateHasChanged;
-        _subscriptions.Add(state);
+        // Handler que garantiza ejecución en el contexto de UI
+        void Handler() => _ = InvokeAsync(async () =>
+        {
+            StateHasChanged();
+
+            ///Notifico al metodo del suscriptor que el estado cambio
+            if (onChangeCallback is not null)
+                await onChangeCallback();
+
+            ///Notifico al metodo por defecto que el estado cambio
+            if (onChangeCallback is null)
+                await OnChangeState();
+        });
+
+        state.OnChange += Handler;
+        _subscriptions.Add((state, Handler));
     }
+    protected virtual Task OnChangeState() => Task.CompletedTask;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -21,8 +36,8 @@ public abstract class StateAwareComponent : ComponentBase, IDisposable
 
         if (disposing)
         {
-            foreach (var state in _subscriptions)
-                state.OnChange -= StateHasChanged;
+            foreach (var (state, handler) in _subscriptions)
+                state.OnChange -= handler;
 
             _subscriptions.Clear();
         }

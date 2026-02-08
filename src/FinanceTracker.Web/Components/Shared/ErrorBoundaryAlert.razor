@@ -1,0 +1,23 @@
+﻿@using FinanceTracker.Web.States.Errors
+
+@inject ErrorState ErrorState
+@inherits StateAwareComponent
+
+@code {
+    /// <summary>
+    /// Indica la acción para resetear el ErrorBoundary.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public EventCallback Reset { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (var error in ErrorState.Errors)
+        {
+            // ToastService.ShowError(error);
+        }
+        await Reset.InvokeAsync();
+        await base.OnInitializedAsync();
+    }
+}

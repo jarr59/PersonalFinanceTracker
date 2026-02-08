@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/CustomMediator/CustomMediator.csproj" />
     <Project Path="src/FinanceTracker.Aplication/FinanceTracker.Aplication.csproj" />
     <Project Path="src/FinanceTracker.Domain/FinanceTracker.Domain.csproj" />
     <Project Path="src/FinanceTracker.Infrastructure/FinanceTracker.Infrastructure.csproj" />

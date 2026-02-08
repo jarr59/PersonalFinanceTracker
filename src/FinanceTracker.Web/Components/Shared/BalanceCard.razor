@@ -1,0 +1,24 @@
+@* Balance Card Component *@
+
+<div class="balance-card">
+    <div class="balance-card-icon">
+        🌙
+    </div>
+    <div class="balance-card-content">
+        <p class="balance-label">Balance</p>
+        <h2 class="balance-amount">@Amount</h2>
+        <p class="card-number">@CardNumber</p>
+        <p class="card-date">@CardDate</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Amount { get; set; } = "$0.00";
+
+    [Parameter]
+    public string CardNumber { get; set; } = "•••• •••• •••• ••••";
+
+    [Parameter]
+    public string CardDate { get; set; } = "MM/YY";
+}

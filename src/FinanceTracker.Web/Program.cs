@@ -1,6 +1,17 @@
+using CustomMediator;
+using FinanceTracker.Aplication.Categories.Commands;
+using FinanceTracker.Aplication.Categories.Queries;
 using FinanceTracker.Infrastructure;
 using FinanceTracker.Web.Components;
+using FinanceTracker.Web.Services.Accounts;
+using FinanceTracker.Web.Services.Categories;
+using FinanceTracker.Web.Services.Errors;
+using FinanceTracker.Web.Services.Transactions;
+using FinanceTracker.Web.States.Accounts;
+using FinanceTracker.Web.States.Categories;
 using FinanceTracker.Web.States.Errors;
+using FinanceTracker.Web.States.Transactions;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +21,23 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Register CQRS Command, Query and Handlers
+builder.Services.AddCustomMediator(typeof(CreateCategoryCommand).Assembly);
+
+// Register Application Services
+builder.Services.AddScoped<ICategoryServices, CategoryServices>();
+builder.Services.AddScoped<IErrorServices, ErrorServices>();
+builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<TransactionService>();
+
 //Register States
 builder.Services.AddScoped<ErrorState>();
+builder.Services.AddScoped<CategoryState>();
+builder.Services.AddScoped<AccountState>();
+builder.Services.AddScoped<TransactionState>();
+
+builder.Services.AddRadzenComponents();
+
 
 var app = builder.Build();
 

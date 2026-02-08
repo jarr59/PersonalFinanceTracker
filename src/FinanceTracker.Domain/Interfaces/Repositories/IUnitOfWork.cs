@@ -8,5 +8,5 @@ public interface IUnitOfWork
     /// <summary>
     ///  
     /// </summary>
-    Task SaveChanges(CancellationToken cancellationToken = default);
+    Task SaveChanges();
 }

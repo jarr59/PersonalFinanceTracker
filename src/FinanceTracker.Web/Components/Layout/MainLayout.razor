@@ -1,24 +1,21 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="app-layout">
-    <aside class="sidebar">
-        <h2 class="logo">Finance</h2>
-        <nav>
-            <a class="active">Dashboard</a>
-            <a href="/Accounts">Cuentas</a>
-            <a href="/Transactions">Movimientos</a>
-            <a href="/Categories">Categorías</a>
-        </nav>
-    </aside>
+<AppErrorBoundary @ref="ErrorBoundary">
+    <ChildContent>
+        <div id="app">
+            @Body
+        </div>
+    </ChildContent>
+    <ErrorContent >
+        <ErrorBoundaryAlert Reset="ResetErrorBoundary" />
+    </ErrorContent>
+</AppErrorBoundary>
 
-    <main class="content">
-        @Body
-    </main>
-</div>
+@code {
+    ErrorBoundary? ErrorBoundary;
 
-
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+    /// <summary>
+    /// Resetea el ErrorBoundary para intentar renderizar nuevamente el contenido.
+    /// </summary>
+    private void ResetErrorBoundary() => ErrorBoundary?.Recover();
+}

@@ -1,23 +1,230 @@
-@page "/Transactions"
-<h1 class="page-title">Movimientos</h1>
+@page "/transactions"
+@using FinanceTracker.Web.States.Transactions
+@using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.States.Accounts
+@inject TransactionState TransactionState
+@inject CategoryState CategoryState
+@inject AccountState AccountState
+@rendermode InteractiveServer
 
-<div class="transactions">
+<Sidebar />
 
-    <div class="transaction expense">
-        <div class="left">
-            <span class="title">Supermercado</span>
-            <span class="category">AlimentaciÃ³n</span>
-        </div>
-        <strong class="amount">- $120</strong>
+<div class="main-content">
+    <TopHeader />
+
+    <div class="page-header">
+        <h1 class="page-title">Transacciones</h1>
+        <button class="btn-primary" @onclick="OpenAddModal">
+            <span class="material-icons">add</span> Nueva Transacción
+        </button>
     </div>
 
-    <div class="transaction income">
-        <div class="left">
-            <span class="title">Salario</span>
-            <span class="category">Ingreso</span>
+    <div class="transactions-stats">
+        <div class="stat-card stat-income">
+            <div class="stat-icon">
+                <span class="material-icons" style="font-size: 32px;">trending_up</span>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Ingresos Totales</div>
+                <div class="stat-value">$@TransactionState.GetTotalIncome().ToString("N2")</div>
+            </div>
         </div>
-        <strong class="amount">+ $1,500</strong>
+        <div class="stat-card stat-expense">
+            <div class="stat-icon">
+                <span class="material-icons" style="font-size: 32px;">trending_down</span>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Gastos Totales</div>
+                <div class="stat-value">$@TransactionState.GetTotalExpenses().ToString("N2")</div>
+            </div>
+        </div>
+        <div class="stat-card stat-balance">
+            <div class="stat-icon">
+                <span class="material-icons" style="font-size: 32px;">account_balance_wallet</span>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Balance</div>
+                <div class="stat-value">$@((TransactionState.GetTotalIncome() - TransactionState.GetTotalExpenses()).ToString("N2"))</div>
+            </div>
+        </div>
     </div>
 
+    <div class="transactions-list">
+        @foreach (var transaction in TransactionState.Transactions.OrderByDescending(t => t.Date))
+        {
+            <div class="transaction-item @(transaction.Amount >= 0 ? "income" : "expense")">
+                <div class="transaction-category">
+                    <div class="category-icon" style="background: @(transaction.CategoryColor)22; color: @transaction.CategoryColor;">
+                        <span class="material-icons">@transaction.CategoryIcon</span>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-description">@transaction.Description</div>
+                        <div class="transaction-meta">
+                            <span class="transaction-category-name">@transaction.CategoryName</span>
+                            <span class="transaction-separator">•</span>
+                            <span class="transaction-account">@transaction.AccountName</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="transaction-right">
+                    <div class="transaction-amount @(transaction.Amount >= 0 ? "positive" : "negative")">
+                        @(transaction.Amount >= 0 ? "+" : "-")$@Math.Abs(transaction.Amount).ToString("N2")
+                    </div>
+                    <div class="transaction-date">@transaction.Date.ToString("dd MMM yyyy")</div>
+                </div>
+                <div class="transaction-actions">
+                    <button class="btn-icon" @onclick="() => OpenEditModal(transaction)">
+                        <span class="material-icons">edit</span>
+                    </button>
+                    <button class="btn-icon btn-danger" @onclick="() => DeleteTransaction(transaction.Id)">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (showModal)
+    {
+        <div class="modal-overlay" @onclick="CloseModal">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>@(isEditing ? "Editar" : "Nueva") Transacción</h2>
+                    <button class="btn-close" @onclick="CloseModal">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" class="form-input" @bind="currentTransaction.Description" placeholder="Ej: Compra supermercado" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Monto</label>
+                            <input type="number" step="0.01" class="form-input" @bind="currentTransaction.Amount" placeholder="0.00" />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="datetime-local" class="form-input" @bind="currentTransaction.Date" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select class="form-input" @bind="currentTransaction.CategoryId">
+                            <option value="">Seleccionar categoría</option>
+                            @foreach (var category in CategoryState.Categories)
+                            {
+                                <option value="@category.Id">
+                                    @category.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cuenta</label>
+                        <select class="form-input" @bind="currentTransaction.AccountId">
+                            <option value="">Seleccionar cuenta</option>
+                            @foreach (var account in AccountState.Accounts)
+                            {
+                                <option value="@account.Id">
+                                    @account.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    <button class="btn-primary" @onclick="SaveTransaction">Guardar</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
+@code {
+    private bool showModal = false;
+    private bool isEditing = false;
+    private TransactionModel currentTransaction = new();
+
+    protected override void OnInitialized()
+    {
+        TransactionState.OnChange += StateHasChanged;
+        CategoryState.OnChange += StateHasChanged;
+        AccountState.OnChange += StateHasChanged;
+    }
+
+    private void OpenAddModal()
+    {
+        isEditing = false;
+        currentTransaction = new TransactionModel 
+        { 
+            Id = Guid.NewGuid(),
+            Date = DateTime.Now
+        };
+        showModal = true;
+    }
+
+    private void OpenEditModal(TransactionModel transaction)
+    {
+        isEditing = true;
+        currentTransaction = new TransactionModel
+        {
+            Id = transaction.Id,
+            Description = transaction.Description,
+            Amount = transaction.Amount,
+            Date = transaction.Date,
+            CategoryId = transaction.CategoryId,
+            AccountId = transaction.AccountId
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentTransaction = new();
+    }
+
+    private void SaveTransaction()
+    {
+        if (string.IsNullOrWhiteSpace(currentTransaction.Description))
+            return;
+
+        var category = CategoryState.Categories.FirstOrDefault(c => c.Id == currentTransaction.CategoryId);
+        if (category != null)
+        {
+   
+        }
+
+        var account = AccountState.Accounts.FirstOrDefault(a => a.Id == currentTransaction.AccountId);
+        if (account != null)
+        {
+            currentTransaction.AccountName = account.Name;
+        }
+
+        if (isEditing)
+        {
+            TransactionState.UpdateTransaction(currentTransaction);
+        }
+        else
+        {
+            TransactionState.AddTransaction(currentTransaction);
+        }
+
+        CloseModal();
+    }
+
+    private void DeleteTransaction(Guid id)
+    {
+        TransactionState.DeleteTransaction(id);
+    }
+
+    public void Dispose()
+    {
+        TransactionState.OnChange -= StateHasChanged;
+        CategoryState.OnChange -= StateHasChanged;
+        AccountState.OnChange -= StateHasChanged;
+    }
+}

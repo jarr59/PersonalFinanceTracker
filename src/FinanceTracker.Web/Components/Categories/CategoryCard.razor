@@ -1,0 +1,50 @@
+@using FinanceTracker.Web.States.Categories
+@using FinanceTracker.Web.States.Categories.DTOs
+
+<div class="category-card" style="background: @(CurrentCategory.Color.Color)22; color: @CurrentCategory.Color.Color; border: 2px solid @CurrentCategory.Color.Color;">
+    <div class="category-content">
+        <span class="material-icons category-icon">@CurrentCategory.Icon.Source</span>
+        <span class="category-name">@CurrentCategory.Name.Name</span>
+    </div>
+    <div class="category-actions">
+        <button class="btn-icon" @onclick="HandleEdit" title="Editar">
+            <span class="material-icons">edit</span>
+        </button>
+        <button class="btn-icon btn-danger" @onclick="HandleDelete" title="Eliminar">
+            <span class="material-icons">delete</span>
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Categoria actual a mostrar
+    /// </summary>
+    [Parameter] 
+    [EditorRequired]
+    public CategoryModel CurrentCategory { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Parameter] 
+    public EventCallback<Guid> OnEdit { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Parameter] 
+    public EventCallback<Guid> OnDelete { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private async Task HandleEdit() => await OnEdit.InvokeAsync(CurrentCategory.Id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private async Task HandleDelete() => await OnDelete.InvokeAsync(CurrentCategory.Id);
+}
