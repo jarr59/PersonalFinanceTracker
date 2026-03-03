@@ -1,0 +1,102 @@
+@using Radzen
+@using Radzen.Blazor
+@using FinanceTracker.Web.States.Transactions
+@inject TransactionState TransactionState
+@rendermode InteractiveServer
+
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H6" style="margin-bottom: 1rem;">Comparativa Ingresos vs Gastos</RadzenText>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <!-- Pie Chart -->
+        <div>
+            <RadzenChart>
+                @* <RadzenPieSeries Data="@GetIncomeExpensesData()" 
+                                 ValueProperty="Value" 
+                 >
+                </RadzenPieSeries> *@
+            </RadzenChart>
+        </div>
+
+        <!-- Stats -->
+        <div>
+            <RadzenStack Gap="1rem">
+                <div class="stat-box income-box">
+                    <RadzenText TextStyle="TextStyle.Subtitle2">Ingresos Totales</RadzenText>
+                    <RadzenText TextStyle="TextStyle.DisplayH4" style="color: #22c55e; font-weight: 700;">
+                        $@TransactionState.GetTotalIncome().ToString("N0")
+                    </RadzenText>
+                </div>
+
+                <div class="stat-box expense-box">
+                    <RadzenText TextStyle="TextStyle.Subtitle2">Gastos Totales</RadzenText>
+                    <RadzenText TextStyle="TextStyle.DisplayH4" style="color: #ef4444; font-weight: 700;">
+                        $@TransactionState.GetTotalExpenses().ToString("N0")
+                    </RadzenText>
+                </div>
+
+                <div class="stat-box balance-box">
+                    <RadzenText TextStyle="TextStyle.Subtitle2">Balance Neto</RadzenText>
+                    @{
+                        var netBalance = TransactionState.GetTotalIncome() - TransactionState.GetTotalExpenses();
+                    }
+                    <div style="color: @(netBalance >= 0 ? "#22c55e" : "#ef4444"); font-weight: 700; font-size: 2rem;">
+                        $@netBalance.ToString("N0")
+                    </div>
+                </div>
+
+                <div class="stat-box">
+                    <RadzenText TextStyle="TextStyle.Subtitle2">Ratio Gastos/Ingresos</RadzenText>
+                    <RadzenText TextStyle="TextStyle.DisplayH5" style="font-weight: 700;">
+                        @GetExpenseRatio()%
+                    </RadzenText>
+                </div>
+            </RadzenStack>
+        </div>
+    </div>
+</RadzenCard>
+
+@code {
+    private List<(string Category, decimal Value, string Fill)> GetIncomeExpensesData()
+    {
+        var income = TransactionState.GetTotalIncome();
+        var expenses = TransactionState.GetTotalExpenses();
+
+        return new List<(string, decimal, string)>
+        {
+            ("Ingresos", income, "#22c55e"),
+            ("Gastos", expenses, "#ef4444")
+        };
+    }
+
+    private string GetExpenseRatio()
+    {
+        var income = TransactionState.GetTotalIncome();
+        if (income == 0)
+            return "0";
+
+        var ratio = (TransactionState.GetTotalExpenses() / income) * 100;
+        return ratio.ToString("N1");
+    }
+}
+
+<style>
+    .stat-box {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid #d1d5db;
+    }
+
+    .income-box {
+        border-left-color: #22c55e;
+    }
+
+    .expense-box {
+        border-left-color: #ef4444;
+    }
+
+    .balance-box {
+        border-left-color: #3b82f6;
+    }
+</style>

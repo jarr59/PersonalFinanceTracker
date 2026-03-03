@@ -1,6 +1,9 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">FinanceTracker.Web</a>
+        <a class="navbar-brand" href="">
+            <span class="material-icons navbar-icon">account_balance_wallet</span>
+            FinanceTracker
+        </a>
     </div>
 </div>
 
@@ -8,23 +11,129 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
+        
+        <!-- Main Navigation -->
+        <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                    <span class="material-icons nav-menu">dashboard</span> Dashboard
+                </NavLink>
+            </div>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
+        <!-- Financial Management -->
+        <div class="nav-section">
+            <div class="nav-section-title">Gestión Financiera</div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="transactions">
+                    <span class="material-icons nav-menu">receipt_long</span> Transacciones
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="accounts">
+                    <span class="material-icons nav-menu">account_balance</span> Cuentas
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="categories">
+                    <span class="material-icons nav-menu">label</span> Categorías
+                </NavLink>
+            </div>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
+        <!-- Reports & Analytics -->
+        <div class="nav-section">
+            <div class="nav-section-title">Reportes</div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="analytics">
+                    <span class="material-icons nav-menu">analytics</span> Análisis
+                </NavLink>
+            </div>
         </div>
+
     </nav>
 </div>
+
+<style>
+    .navbar-icon {
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+
+    .nav-section {
+        margin-top: 1.5rem;
+    }
+
+    .nav-section:first-child {
+        margin-top: 0;
+    }
+
+    .nav-section-title {
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #9ca3af;
+    }
+
+    .nav-menu {
+        margin-right: 0.75rem;
+        font-size: 20px;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0 !important;
+        color: #d1d5db;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+    }
+
+    .nav-link.active {
+        color: #3b82f6;
+        font-weight: 600;
+        background-color: rgba(59, 130, 246, 0.1);
+        border-radius: 6px;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ffffff !important;
+        text-decoration: none;
+    }
+
+    .navbar-brand:hover {
+        color: #d1d5db !important;
+    }
+
+    .navbar-dark {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border-bottom: 1px solid #374151;
+    }
+
+    .nav-scrollable {
+        background: #111827;
+    }
+
+    .nav {
+        padding: 1rem 0;
+    }
+</style>
 

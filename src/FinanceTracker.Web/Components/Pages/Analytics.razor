@@ -1,0 +1,97 @@
+@page "/analytics"
+@using FinanceTracker.Web.States.Transactions
+@using FinanceTracker.Web.States.Accounts
+@using FinanceTracker.Web.Components.Metrics
+@using FinanceTracker.Web.Components.Charts
+@using Radzen
+@using Radzen.Blazor
+@inject TransactionState TransactionState
+@inject AccountState AccountState
+@inherits StateAwareComponent
+@rendermode InteractiveServer
+
+<Sidebar />
+
+<div class="main-content">
+    <TopHeader />
+
+    <div class="page-header">
+        <h1 class="page-title">Análisis y Reportes</h1>
+    </div>
+
+    <!-- Key Metrics -->
+    <KeyMetrics />
+
+    <!-- Charts Row 1 -->
+    <div class="charts-container">
+        <IncomeExpenseChart />
+        <ExpenseByCategoryChart />
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-card">
+        <h3>Transacciones Recientes</h3>
+        <RadzenDataGrid AllowFiltering="true" 
+                       AllowPaging="true" 
+                       PageSize="10"
+                       Data="@TransactionState.GetRecentTransactions(50)" 
+                       TItem="TransactionModel"
+                       ColumnWidth="200px">
+            <Columns>
+                <RadzenDataGridColumn TItem="TransactionModel" 
+                                     Property="Date" 
+                                     Title="Fecha" 
+                                     FormatString="{0:dd/MM/yyyy}">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TransactionModel" 
+                                     Property="Description" 
+                                     Title="Descripción">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TransactionModel" 
+                                     Property="CategoryName" 
+                                     Title="Categoría">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TransactionModel" 
+                                     Property="Amount" 
+                                     Title="Monto" 
+                                     FormatString="{0:C}">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="TransactionModel" 
+                                     Property="AccountName" 
+                                     Title="Cuenta">
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Subscribe(TransactionState);
+        await Subscribe(AccountState);
+        await base.OnInitializedAsync();
+    }
+}
+
+<style>
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-card h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.125rem;
+        color: #1f2937;
+    }
+</style>

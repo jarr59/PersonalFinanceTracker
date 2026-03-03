@@ -1,6 +1,9 @@
 @page "/accounts"
 @using FinanceTracker.Web.States.Accounts
+@using FinanceTracker.Domain.ValueObjects
+@using FinanceTracker.Web.Services.Accounts
 @inject AccountState AccountState
+@inject IAccountService AccountService
 @rendermode InteractiveServer
 
 <Sidebar />
@@ -10,7 +13,7 @@
 
     <div class="page-header">
         <h1 class="page-title">Cuentas</h1>
-        <button class="btn-primary" @onclick="OpenAddModal">
+        <button class="btn-primary" @onclick="OpenAddModal" disabled="@AccountState.IsAdding">
             <span class="material-icons">add</span> Nueva Cuenta
         </button>
     </div>
@@ -45,39 +48,48 @@
         </div>
     </div>
 
-    <div class="accounts-grid">
-        @foreach (var account in AccountState.Accounts)
-        {
-            <div class="account-card" style="background: linear-gradient(135deg, @account.Color 0%, @account.Color + "cc" 100%);">
-                <div class="account-header">
-                    <div class="account-icon">
-                        <span class="material-icons" style="font-size: 36px;">@account.Icon</span>
+    @if (AccountState.IsLoading)
+    {
+        <div class="loading-spinner">
+            <span class="material-icons spinning">refresh</span> Cargando cuentas...
+        </div>
+    }
+    else
+    {
+        <div class="accounts-grid">
+            @foreach (var account in AccountState.Accounts)
+            {
+                <div class="account-card" style="background: linear-gradient(135deg, @account.Color 0%, @account.Color + "cc" 100%);">
+                    <div class="account-header">
+                        <div class="account-icon">
+                            <span class="material-icons" style="font-size: 36px;">@account.Icon</span>
+                        </div>
+                        <div class="account-actions">
+                            <button class="btn-icon-light" @onclick="() => OpenEditModal(account)" disabled="@AccountState.IsUpdating">
+                                <span class="material-icons">edit</span>
+                            </button>
+                            <button class="btn-icon-light" @onclick="() => DeleteAccount(account.Id)" disabled="@AccountState.IsDeleting">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="account-actions">
-                        <button class="btn-icon-light" @onclick="() => OpenEditModal(account)">
-                            <span class="material-icons">edit</span>
+                    <div class="account-info">
+                        <div class="account-name">@account.Name</div>
+                        <div class="account-balance">$@account.Balance.ToString("N2")</div>
+                        <div class="account-currency">@account.Currency</div>
+                    </div>
+                    <div class="account-footer">
+                        <button class="account-action-btn" @onclick="() => OpenTransferModal(account)" disabled="@AccountState.IsUpdating">
+                            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">swap_horiz</span> Transferir
                         </button>
-                        <button class="btn-icon-light" @onclick="() => DeleteAccount(account.Id)">
-                            <span class="material-icons">delete</span>
+                        <button class="account-action-btn" @onclick="() => OpenDepositModal(account)">
+                            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">add_circle</span> Depositar
                         </button>
                     </div>
                 </div>
-                <div class="account-info">
-                    <div class="account-name">@account.Name</div>
-                    <div class="account-balance">$@account.Balance.ToString("N2")</div>
-                    <div class="account-currency">@account.Currency</div>
-                </div>
-                <div class="account-footer">
-                    <button class="account-action-btn" @onclick="() => OpenTransferModal(account)">
-                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">swap_horiz</span> Transferir
-                    </button>
-                    <button class="account-action-btn" @onclick="() => OpenDepositModal(account)">
-                        <span class="material-icons" style="font-size: 16px; vertical-align: middle;">add_circle</span> Depositar
-                    </button>
-                </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
 
     @if (showModal)
     {
@@ -85,12 +97,12 @@
             <div class="modal-content" @onclick:stopPropagation="true">
                 <div class="modal-header">
                     <h2>@(isEditing ? "Editar" : "Nueva") Cuenta</h2>
-                    <button class="btn-close" @onclick="CloseModal">??</button>
+                    <button class="btn-close" @onclick="CloseModal">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nombre de la Cuenta</label>
-                        <input type="text" class="form-input" @bind="currentAccount.Name" placeholder="Ej: Cuenta Principal" />
+                        <input type="text" class="form-input" @bind="tempName" placeholder="Ej: Cuenta Principal" />
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -109,27 +121,27 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Icono (Material Icon)</label>
-                            <input type="text" class="form-input" @bind="currentAccount.Icon" placeholder="credit_card" />
+                            <input type="text" class="form-input" @bind="tempIcon" placeholder="credit_card" />
                         </div>
                         <div class="form-group">
                             <label>Color (Hex)</label>
-                            <input type="text" class="form-input" @bind="currentAccount.Color" placeholder="#3b82f6" />
+                            <input type="text" class="form-input" @bind="tempColor" placeholder="#3b82f6" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Vista Previa</label>
-                        <div class="account-preview" style="background: linear-gradient(135deg, @currentAccount.Color 0%, @currentAccount.Color + "cc" 100%);">
+                        <div class="account-preview" style="background: linear-gradient(135deg, @tempColor 0%, @tempColor + "cc" 100%);">
                             <div style="font-size: 32px;">
-                                <span class="material-icons" style="font-size: 48px;">@currentAccount.Icon</span>
+                                <span class="material-icons" style="font-size: 48px;">@tempIcon</span>
                             </div>
-                            <div style="font-size: 18px; font-weight: 600; margin-top: 10px;">@currentAccount.Name</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-top: 10px;">@tempName</div>
                             <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">$@currentAccount.Balance.ToString("N2")</div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn-secondary" @onclick="CloseModal">Cancelar</button>
-                    <button class="btn-primary" @onclick="SaveAccount">Guardar</button>
+                    <button class="btn-primary" @onclick="SaveAccount" disabled="@AccountState.IsAdding">Guardar</button>
                 </div>
             </div>
         </div>
@@ -144,7 +156,7 @@
                         <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">account_balance_wallet</span>
                         Depositar a @selectedAccount?.Name
                     </h2>
-                    <button class="btn-close" @onclick="CloseDepositModal">??</button>
+                    <button class="btn-close" @onclick="CloseDepositModal">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
@@ -159,30 +171,85 @@
             </div>
         </div>
     }
+
+    @if (showTransferModal)
+    {
+        <div class="modal-overlay" @onclick="CloseTransferModal">
+            <div class="modal-content modal-small" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>
+                        <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">swap_horiz</span>
+                        Transferir desde @selectedAccount?.Name
+                    </h2>
+                    <button class="btn-close" @onclick="CloseTransferModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Seleccionar Cuenta Destino</label>
+                        <select class="form-input" @bind="transferToAccountId">
+                            <option value="">Seleccione una cuenta</option>
+                            @foreach (var account in AccountState.Accounts.Where(a => a.Id != selectedAccount?.Id))
+                            {
+                                <option value="@account.Id">@account.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Monto a Transferir</label>
+                        <input type="number" step="0.01" class="form-input" @bind="transferAmount" placeholder="0.00" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" class="form-input" @bind="transferDescription" placeholder="Descripción opcional" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" @onclick="CloseTransferModal">Cancelar</button>
+                    <button class="btn-primary" @onclick="ProcessTransfer" disabled="@AccountState.IsUpdating">Transferir</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private bool showModal = false;
     private bool showDepositModal = false;
+    private bool showTransferModal = false;
     private bool isEditing = false;
     private AccountModel currentAccount = new();
     private AccountModel? selectedAccount;
     private decimal depositAmount = 0;
+    private Guid transferToAccountId = Guid.Empty;
+    private decimal transferAmount = 0;
+    private string transferDescription = string.Empty;
 
-    protected override void OnInitialized()
+    // Temporary strings for binding
+    private string tempName = string.Empty;
+    private string tempIcon = string.Empty;
+    private string tempColor = string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
         AccountState.OnChange += StateHasChanged;
+        await AccountService.LoadAllAccountsAsync();
+        await base.OnInitializedAsync();
     }
 
     private void OpenAddModal()
     {
         isEditing = false;
+        tempName = "Nueva Cuenta";
+        tempIcon = "credit_card";
+        tempColor = "#3b82f6";
         currentAccount = new AccountModel 
         { 
             Id = Guid.NewGuid(), 
-            Icon = "credit_card", 
-            Color = "#3b82f6",
-            Currency = "USD"
+            Name = tempName,
+            Balance = 0,
+            Currency = "USD",
+            Icon = tempIcon, 
+            Color = tempColor
         };
         showModal = true;
     }
@@ -190,6 +257,9 @@
     private void OpenEditModal(AccountModel account)
     {
         isEditing = true;
+        tempName = account.Name;
+        tempIcon = account.Icon;
+        tempColor = account.Color;
         currentAccount = new AccountModel
         {
             Id = account.Id,
@@ -208,26 +278,37 @@
         currentAccount = new();
     }
 
-    private void SaveAccount()
+    private async Task SaveAccount()
     {
-        if (string.IsNullOrWhiteSpace(currentAccount.Name))
+        if (string.IsNullOrWhiteSpace(tempName))
             return;
 
         if (isEditing)
         {
-            AccountState.UpdateAccount(currentAccount);
+            await AccountService.UpdateAccountAsync(
+                currentAccount.Id,
+                tempName,
+                currentAccount.Balance,
+                currentAccount.Currency,
+                tempIcon,
+                tempColor);
         }
         else
         {
-            AccountState.AddAccount(currentAccount);
+            await AccountService.CreateAccountAsync(
+                tempName,
+                currentAccount.Balance,
+                currentAccount.Currency,
+                tempIcon,
+                tempColor);
         }
 
         CloseModal();
     }
 
-    private void DeleteAccount(Guid id)
+    private async Task DeleteAccount(Guid id)
     {
-        AccountState.DeleteAccount(id);
+        await AccountService.DeleteAccountAsync(id);
     }
 
     private void OpenDepositModal(AccountModel account)
@@ -244,7 +325,7 @@
         depositAmount = 0;
     }
 
-    private void ProcessDeposit()
+    private async Task ProcessDeposit()
     {
         if (selectedAccount != null && depositAmount > 0)
         {
@@ -255,7 +336,34 @@
 
     private void OpenTransferModal(AccountModel account)
     {
-        // TODO: Implement transfer functionality
+        selectedAccount = account;
+        transferToAccountId = Guid.Empty;
+        transferAmount = 0;
+        transferDescription = string.Empty;
+        showTransferModal = true;
+    }
+
+    private void CloseTransferModal()
+    {
+        showTransferModal = false;
+        selectedAccount = null;
+        transferToAccountId = Guid.Empty;
+        transferAmount = 0;
+        transferDescription = string.Empty;
+    }
+
+    private async Task ProcessTransfer()
+    {
+        if (selectedAccount == null || transferToAccountId == Guid.Empty || transferAmount <= 0)
+            return;
+
+        await AccountService.TransferFundsAsync(
+            selectedAccount.Id,
+            transferToAccountId,
+            transferAmount,
+            transferDescription);
+
+        CloseTransferModal();
     }
 
     public void Dispose()

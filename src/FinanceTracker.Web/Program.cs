@@ -27,8 +27,8 @@ builder.Services.AddCustomMediator(typeof(CreateCategoryCommand).Assembly);
 // Register Application Services
 builder.Services.AddScoped<ICategoryServices, CategoryServices>();
 builder.Services.AddScoped<IErrorServices, ErrorServices>();
-builder.Services.AddScoped<AccountService>();
-builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 //Register States
 builder.Services.AddScoped<ErrorState>();

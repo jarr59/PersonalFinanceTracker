@@ -1,0 +1,96 @@
+@using Radzen
+@using Radzen.Blazor
+@using FinanceTracker.Web.States.Transactions
+@using FinanceTracker.Web.States.Accounts
+@inject TransactionState TransactionState
+@inject AccountState AccountState
+@rendermode InteractiveServer
+
+<div class="metrics-container">
+    <RadzenCard>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="2rem">
+            
+            <!-- Metric 1: Total Income -->
+            <div class="metric-item">
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="metric-label">Ingresos Totales</RadzenText>
+                <RadzenText TextStyle="TextStyle.DisplayH3" class="metric-value income">
+                    $@TransactionState.GetTotalIncome().ToString("N0")
+                </RadzenText>
+            </div>
+
+            <!-- Metric 2: Total Expenses -->
+            <div class="metric-item">
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="metric-label">Gastos Totales</RadzenText>
+                <RadzenText TextStyle="TextStyle.DisplayH3" class="metric-value expense">
+                    $@TransactionState.GetTotalExpenses().ToString("N0")
+                </RadzenText>
+            </div>
+
+            <!-- Metric 3: Net Balance -->
+            <div class="metric-item">
+                @{
+                    var netBalance = TransactionState.GetTotalIncome() - TransactionState.GetTotalExpenses();
+                    var balanceClass = netBalance >= 0 ? "positive" : "negative";
+                }
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="metric-label">Balance Neto</RadzenText>
+                <div class="metric-value @balanceClass">
+                    $@netBalance.ToString("N0")
+                </div>
+            </div>
+
+            <!-- Metric 4: Total Accounts Balance -->
+            <div class="metric-item">
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="metric-label">Balance de Cuentas</RadzenText>
+                <RadzenText TextStyle="TextStyle.DisplayH3" class="metric-value balance">
+                    $@AccountState.Accounts.Sum(a => a.Balance).ToString("N0")
+                </RadzenText>
+            </div>
+
+        </RadzenStack>
+    </RadzenCard>
+</div>
+
+@code {
+}
+
+<style>
+    .metrics-container {
+        margin-bottom: 2rem;
+    }
+
+    .metric-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .metric-label {
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .metric-value {
+        font-weight: 700;
+        margin-top: 0.5rem;
+        font-size: 1.875rem;
+    }
+
+    .metric-value.income {
+        color: #22c55e;
+    }
+
+    .metric-value.expense {
+        color: #ef4444;
+    }
+
+    .metric-value.balance {
+        color: #3b82f6;
+    }
+
+    .metric-value.positive {
+        color: #22c55e;
+    }
+
+    .metric-value.negative {
+        color: #ef4444;
+    }
+</style>

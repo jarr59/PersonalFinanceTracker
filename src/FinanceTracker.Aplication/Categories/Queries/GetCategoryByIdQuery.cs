@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using FinanceTracker.Domain.Categories;
 using FinanceTracker.Domain.Interfaces.Repositories;
 
@@ -7,7 +8,7 @@ public sealed record GetCategoryByIdQuery(Guid Id) : ICustomQuery<Category?>;
 
 public class GetCategoryByIdQueryHandler(ICategoryRepository _repository) : ICustomQueryHandler<GetCategoryByIdQuery, Category?>
 {
-    public async Task<Category?> HandleAsync(GetCategoryByIdQuery query, CancellationToken cancellationToken = default)
+    public async Task<Category?> HandleAsync(GetCategoryByIdQuery query)
     {
         return await _repository.GetById(query.Id);
     }

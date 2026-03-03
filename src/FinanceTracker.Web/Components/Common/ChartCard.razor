@@ -1,0 +1,68 @@
+@using Radzen
+@using Radzen.Blazor
+
+@if (ShowLoadingIndicator && IsLoading)
+{
+    <div class="loading-overlay">
+        <RadzenProgressBarCircular Value="100" ShowValue="false">
+            <Template>
+                <span class="material-icons spinning">refresh</span>
+            </Template>
+        </RadzenProgressBarCircular>
+    </div>
+}
+
+<div class="rz-card">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <RadzenCard>
+            <RadzenStack>
+                <RadzenText TextStyle="TextStyle.H6">@Title</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    }
+    <div style="padding: 1rem;">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment ChildContent { get; set; } = null!;
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public bool ShowLoadingIndicator { get; set; } = true;
+}
+
+<style>
+    .rz-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .spinning {
+        animation: spin 1s linear infinite;
+    }
+</style>

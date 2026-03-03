@@ -9,18 +9,22 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Domain.Transact
 {
     public void Configure(EntityTypeBuilder<Transaction> builder)
     {
-        builder.HasKey(x => new { x.Id, x.UserId });
+        builder.HasKey(x => x.Id);
 
         builder.Property(e => e.Id)
             .HasMaxLength(SizeValues.KEY)
             .IsRequired();
 
-        builder.Property(e => e.UserId)
+        builder.Property(e => e.CategoryId)
+            .HasMaxLength(SizeValues.KEY)
+            .IsRequired();
+
+        builder.Property(e => e.AccountId)
             .HasMaxLength(SizeValues.KEY)
             .IsRequired();
 
         builder.Property(e => e.Amount)
-            .HasPrecision(18,2)
+            .HasPrecision(18, 2)
             .IsRequired();
 
         builder.Property(e => e.Date)

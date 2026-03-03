@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using FinanceTracker.Domain.Categories;
 using FinanceTracker.Domain.Interfaces.Repositories;
 
@@ -7,7 +9,7 @@ public sealed record GetAllCategoriesQuery : ICustomQuery<List<Category>>;
 
 public class GetAllCategoriesQueryHandler(ICategoryRepository _repository) : ICustomQueryHandler<GetAllCategoriesQuery, List<Category>>
 {
-    public async Task<List<Category>> HandleAsync(GetAllCategoriesQuery query, CancellationToken cancellationToken = default)
+    public async Task<List<Category>> HandleAsync(GetAllCategoriesQuery query)
     {
         return await _repository.GetAll();
     }

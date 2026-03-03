@@ -1,0 +1,91 @@
+@using FinanceTracker.Web.Components.Transactions.ViewModels
+@using FinanceTracker.Web.States.Accounts
+@using FinanceTracker.Web.States.Categories.DTOs
+
+<Modal IsVisible="@IsVisible"
+       Title="@GetTitle()"
+       OnClose="@OnClose"
+       OnSave="@HandleSave">
+
+    <EditForm Model="Model" @ref="EditForm">
+        <div class="form-group">
+            <label>Descripción</label>
+            <InputText @bind-Value="Model.Description" class="form-input" placeholder="Ej: Compra supermercado" />
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Monto</label>
+                <InputNumber @bind-Value="Model.Amount" class="form-input" />
+            </div>
+            <div class="form-group">
+                <label>Fecha</label>
+                <InputDate @bind-Value="Model.Date" class="form-input" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Categoría</label>
+            <select class="form-input" @bind="Model.CategoryId">
+                <option value="@Guid.Empty">Seleccionar categoría</option>
+                @foreach (CategoryModel category in Categories)
+                {
+                    <option value="@category.Id">
+                        @category.Name.Name
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cuenta</label>
+            <select class="form-input" @bind="Model.AccountId">
+                <option value="@Guid.Empty">Seleccionar cuenta</option>
+                @foreach (AccountModel account in Accounts)
+                {
+                    <option value="@account.Id">
+                        @account.Name
+                    </option>
+                }
+            </select>
+        </div>
+    </EditForm>
+</Modal>
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public TransactionModalVM Model { get; set; } = new();
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public bool IsEditing { get; set; }
+
+    [Parameter]
+    public bool IsSaving { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public IEnumerable<CategoryModel> Categories { get; set; } = Array.Empty<CategoryModel>();
+
+    [Parameter]
+    [EditorRequired]
+    public IEnumerable<AccountModel> Accounts { get; set; } = Array.Empty<AccountModel>();
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<TransactionModalVM> OnSave { get; set; }
+
+    private EditForm? EditForm { get; set; }
+
+    private string GetTitle() => IsEditing ? "Editar Transacción" : "Nueva Transacción";
+
+    private async Task HandleSave()
+    {
+        if (!IsSaving && EditForm?.EditContext?.Validate() == true)
+        {
+            await OnSave.InvokeAsync(Model);
+        }
+    }
+}

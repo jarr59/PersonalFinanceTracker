@@ -4,74 +4,23 @@ public sealed class TransactionState : StateContainerBase
 {
     private readonly Random _random = new();
 
-    public List<TransactionModel> Transactions { get; private set; } = new()
+    public List<TransactionModel> Transactions { get; private set; } = new();
+
+    // Loading states
+    public bool IsLoading { get; private set; }
+    public bool IsSaving { get; private set; }
+    public bool IsDeleting { get; private set; }
+
+    /// <summary>
+    /// Indica si hay alguna operación en curso
+    /// </summary>
+    public bool IsBusy => IsLoading || IsSaving || IsDeleting;
+
+    public void SetTransactions(List<TransactionModel> transactions)
     {
-        new TransactionModel 
-        { 
-            Id = Guid.NewGuid(),
-            Description = "Compra supermercado",
-            Amount = -150.50m,
-            Date = DateTime.Now.AddDays(-1),
-            CategoryId = Guid.NewGuid(),
-            CategoryName = "Alimentación",
-            CategoryIcon = "restaurant",
-            CategoryColor = "#22c55e",
-            AccountId = Guid.NewGuid(),
-            AccountName = "Cuenta Principal"
-        },
-        new TransactionModel 
-        { 
-            Id = Guid.NewGuid(),
-            Description = "Salario mensual",
-            Amount = 5000.00m,
-            Date = DateTime.Now.AddDays(-2),
-            CategoryId = Guid.NewGuid(),
-            CategoryName = "Otros",
-            CategoryIcon = "attach_money",
-            CategoryColor = "#64748b",
-            AccountId = Guid.NewGuid(),
-            AccountName = "Cuenta Principal"
-        },
-        new TransactionModel 
-        { 
-            Id = Guid.NewGuid(),
-            Description = "Uber viaje centro",
-            Amount = -25.00m,
-            Date = DateTime.Now.AddDays(-3),
-            CategoryId = Guid.NewGuid(),
-            CategoryName = "Transporte",
-            CategoryIcon = "directions_car",
-            CategoryColor = "#3b82f6",
-            AccountId = Guid.NewGuid(),
-            AccountName = "Cuenta Principal"
-        },
-        new TransactionModel 
-        { 
-            Id = Guid.NewGuid(),
-            Description = "Netflix subscription",
-            Amount = -15.99m,
-            Date = DateTime.Now.AddDays(-5),
-            CategoryId = Guid.NewGuid(),
-            CategoryName = "Entretenimiento",
-            CategoryIcon = "sports_esports",
-            CategoryColor = "#ec4899",
-            AccountId = Guid.NewGuid(),
-            AccountName = "Cuenta Principal"
-        },
-        new TransactionModel 
-        { 
-            Id = Guid.NewGuid(),
-            Description = "Consulta médica",
-            Amount = -80.00m,
-            Date = DateTime.Now.AddDays(-7),
-            CategoryId = Guid.NewGuid(),
-            CategoryName = "Salud",
-            CategoryIcon = "local_hospital",
-            CategoryColor = "#ef4444",
-            AccountId = Guid.NewGuid(),
-            AccountName = "Cuenta Principal"
-        }
-    };
+        Transactions = transactions;
+        NotifyStateChanged();
+    }
 
     public void AddTransaction(TransactionModel transaction)
     {
@@ -121,18 +70,23 @@ public sealed class TransactionState : StateContainerBase
     {
         return Math.Abs(Transactions.Where(t => t.Amount < 0).Sum(t => t.Amount));
     }
-}
 
-public class TransactionModel
-{
-    public Guid Id { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public DateTime Date { get; set; }
-    public Guid CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public string CategoryIcon { get; set; } = string.Empty;
-    public string CategoryColor { get; set; } = string.Empty;
-    public Guid AccountId { get; set; }
-    public string AccountName { get; set; } = string.Empty;
+    // Loading state management
+    public void SetIsLoading()
+    {
+        IsLoading = !IsLoading;
+        NotifyStateChanged();
+    }
+
+    public void SetIsSaving()
+    {
+        IsSaving = !IsSaving;
+        NotifyStateChanged();
+    }
+
+    public void SetIsDeleting()
+    {
+        IsDeleting = !IsDeleting;
+        NotifyStateChanged();
+    }
 }

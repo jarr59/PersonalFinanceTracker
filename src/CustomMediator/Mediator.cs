@@ -1,4 +1,8 @@
-﻿using CustomMediator.CQRS;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CustomMediator.CQRS;
 using CustomMediator.CQRS.Commands;
 using CustomMediator.CQRS.Queries;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,11 +28,10 @@ public class Mediator(IServiceProvider provider) : IMediator
     /// <typeparam name="TCommand">Tipo del command a ejecutar</typeparam>
     /// <typeparam name="TResult">Tipo del resultado esperado</typeparam>
     /// <param name="command">Instancia del command con los datos</param>
-    /// <param name="cancellationToken">Token para cancelación de operaciones asíncronas</param>
     /// <returns>Resultado de la ejecución del command</returns>
-    public async Task<TResult> SendCommandAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken = default) where TCommand : ICustomCommand<TResult>
+    public async Task<TResult> SendCommandAsync<TCommand, TResult>(TCommand command) where TCommand : ICustomCommand<TResult>
     {
-        var handlers = provider.GetServices<ICustomCommandHandler<TCommand, TResult>>().ToList();
+        List<ICustomCommandHandler<TCommand, TResult>> handlers = provider.GetServices<ICustomCommandHandler<TCommand, TResult>>().ToList();
         if (handlers.Count == 0)
         {
             throw new InvalidOperationException($"No handler registered for {typeof(TCommand).Name}");
@@ -39,16 +42,16 @@ public class Mediator(IServiceProvider provider) : IMediator
             throw new InvalidOperationException($"Multiple handlers registered for {typeof(TCommand).Name}");
         }
 
-        var handler = handlers[0];
+        ICustomCommandHandler<TCommand, TResult> handler = handlers[0];
 
-        var behaviors = provider.GetServices<IPipelineBehavior<TCommand, TResult>>().Reverse();
+        IEnumerable<IPipelineBehavior<TCommand, TResult>> behaviors = provider.GetServices<IPipelineBehavior<TCommand, TResult>>().Reverse();
 
-        Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(command, cancellationToken);
+        Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(command);
 
-        foreach (var behavior in behaviors)
+        foreach (IPipelineBehavior<TCommand, TResult> behavior in behaviors)
         {
-            var next = handlerDelegate;
-            handlerDelegate = () => behavior.HandleAsync(command, next, cancellationToken);
+            Func<Task<TResult>> next = handlerDelegate;
+            handlerDelegate = () => behavior.HandleAsync(command, next);
         }
 
         return await handlerDelegate();
@@ -66,11 +69,10 @@ public class Mediator(IServiceProvider provider) : IMediator
     /// <typeparam name="TQuery">Tipo de la query a ejecutar</typeparam>
     /// <typeparam name="TResult">Tipo del resultado esperado</typeparam>
     /// <param name="query">Instancia de la query con los parámetros de búsqueda</param>
-    /// <param name="cancellationToken">Token para cancelación de operaciones asíncronas</param>
     /// <returns>Resultado de la ejecución de la query</returns>
-    public async Task<TResult> SendQueryAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = default) where TQuery : ICustomQuery<TResult>
+    public async Task<TResult> SendQueryAsync<TQuery, TResult>(TQuery query) where TQuery : ICustomQuery<TResult>
     {
-        var handlers = provider.GetServices<ICustomQueryHandler<TQuery, TResult>>().ToList();
+        List<ICustomQueryHandler<TQuery, TResult>> handlers = provider.GetServices<ICustomQueryHandler<TQuery, TResult>>().ToList();
         if (handlers.Count == 0)
         {
             throw new InvalidOperationException($"No handler registered for {typeof(TQuery).Name}");
@@ -81,16 +83,16 @@ public class Mediator(IServiceProvider provider) : IMediator
             throw new InvalidOperationException($"Multiple handlers registered for {typeof(TQuery).Name}");
         }
 
-        var handler = handlers[0];
+        ICustomQueryHandler<TQuery, TResult> handler = handlers[0];
 
-        var behaviors = provider.GetServices<IPipelineBehavior<TQuery, TResult>>().Reverse();
+        IEnumerable<IPipelineBehavior<TQuery, TResult>> behaviors = provider.GetServices<IPipelineBehavior<TQuery, TResult>>().Reverse();
 
-        Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(query, cancellationToken);
+        Func<Task<TResult>> handlerDelegate = () => handler.HandleAsync(query);
 
-        foreach (var behavior in behaviors)
+        foreach (IPipelineBehavior<TQuery, TResult> behavior in behaviors)
         {
-            var next = handlerDelegate;
-            handlerDelegate = () => behavior.HandleAsync(query, next, cancellationToken);
+            Func<Task<TResult>> next = handlerDelegate;
+            handlerDelegate = () => behavior.HandleAsync(query, next);
         }
 
         return await handlerDelegate();

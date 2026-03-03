@@ -1,25 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using CustomMediator;
+using FinanceTracker.Aplication.Transactions.Commands;
+using FinanceTracker.Aplication.Transactions.Queries;
+using FinanceTracker.Domain.Enums;
+using FinanceTracker.Domain.Transaction;
+using FinanceTracker.Web.States.Accounts;
+using FinanceTracker.Web.States.Categories;
+using FinanceTracker.Web.States.Categories.DTOs;
+using FinanceTracker.Web.States.Transactions;
+
 namespace FinanceTracker.Web.Services.Transactions;
 
 /// <summary>
 /// Service for managing transaction operations.
 /// Encapsulates all transaction-related business logic.
 /// </summary>
-public class TransactionService
+public class TransactionService(IMediator mediator, TransactionState transactionState, CategoryState categoryState, AccountState accountState)
+    : ITransactionService
 {
-    // Placeholder for future CQRS implementation
-    // This service will handle transaction commands and queries
-
-    public TransactionService()
-    {
-    }
-
     /// <summary>
     /// Creates a new transaction.
     /// </summary>
     public async Task CreateTransactionAsync(string description, decimal amount, DateTime date, Guid categoryId, Guid accountId)
     {
-        // TODO: Implement CreateTransactionCommand
-        await Task.CompletedTask;
+        transactionState.SetIsSaving();
+        TransactionType type = amount >= 0 ? TransactionType.Incoming : TransactionType.Outgoing;
+        DateTimeOffset transactionDate = new(date);
+
+        Transaction result = await mediator.SendCommandAsync<CreateTransactionCommand, Transaction>(
+            new CreateTransactionCommand(categoryId, accountId, amount, transactionDate, description, type));
+
+        TransactionModel model = MapToModel(result);
+        transactionState.AddTransaction(model);
+        transactionState.SetIsSaving();
     }
 
     /// <summary>
@@ -27,51 +43,60 @@ public class TransactionService
     /// </summary>
     public async Task UpdateTransactionAsync(Guid id, string description, decimal amount, DateTime date, Guid categoryId, Guid accountId)
     {
-        // TODO: Implement UpdateTransactionCommand
-        await Task.CompletedTask;
+        transactionState.SetIsSaving();
+        TransactionType type = amount >= 0 ? TransactionType.Incoming : TransactionType.Outgoing;
+        DateTimeOffset transactionDate = new(date);
+
+        Transaction result = await mediator.SendCommandAsync<UpdateTransactionCommand, Transaction>(
+            new UpdateTransactionCommand(id, categoryId, accountId, amount, transactionDate, description, type));
+
+        TransactionModel model = MapToModel(result);
+        transactionState.UpdateTransaction(model);
+        transactionState.SetIsSaving();
+    }
+
+    /// <summary>
+    /// Deletes a transaction.
+    /// </summary>
+    public async Task DeleteTransactionAsync(Guid id)
+    {
+        transactionState.SetIsDeleting();
+        await mediator.SendCommandAsync<DeleteTransactionCommand, bool>(new DeleteTransactionCommand(id));
+        transactionState.DeleteTransaction(id);
+        transactionState.SetIsDeleting();
     }
 
     /// <summary>
     /// Retrieves all transactions.
     /// </summary>
-    public async Task<List<TransactionDto>> GetAllTransactionsAsync()
+    public async Task LoadAllTransactionsAsync()
     {
-        // TODO: Implement GetAllTransactionsQuery
-        return await Task.FromResult(new List<TransactionDto>());
+        transactionState.SetIsLoading();
+        List<Transaction> result = await mediator.SendQueryAsync<GetAllTransactionsQuery, List<Transaction>>(
+            new GetAllTransactionsQuery());
+
+        List<TransactionModel> models = result.Select(MapToModel).ToList();
+        transactionState.SetTransactions(models);
+        transactionState.SetIsLoading();
     }
 
-    /// <summary>
-    /// Retrieves recent transactions.
-    /// </summary>
-    public async Task<List<TransactionDto>> GetRecentTransactionsAsync(int count = 5)
+    private TransactionModel MapToModel(Transaction transaction)
     {
-        // TODO: Implement GetRecentTransactionsQuery
-        return await Task.FromResult(new List<TransactionDto>());
-    }
+        CategoryModel? category = categoryState.Categories.FirstOrDefault(c => c.Id == transaction.CategoryId);
+        AccountModel? account = accountState.Accounts.FirstOrDefault(a => a.Id == transaction.AccountId);
 
-    /// <summary>
-    /// Retrieves a transaction by ID.
-    /// </summary>
-    public async Task<TransactionDto?> GetTransactionByIdAsync(Guid id)
-    {
-        // TODO: Implement GetTransactionByIdQuery
-        return await Task.FromResult<TransactionDto?>(null);
+        return new TransactionModel
+        {
+            Id = transaction.Id,
+            Description = transaction.Description,
+            Amount = transaction.Amount,
+            Date = transaction.Date.DateTime,
+            CategoryId = transaction.CategoryId,
+            CategoryName = category?.Name.Name ?? string.Empty,
+            CategoryIcon = category?.Icon.Source ?? string.Empty,
+            CategoryColor = category?.Color.Color ?? "#64748b",
+            AccountId = transaction.AccountId,
+            AccountName = account?.Name ?? string.Empty
+        };
     }
-}
-
-/// <summary>
-/// DTO for transferring transaction data between layers.
-/// </summary>
-public class TransactionDto
-{
-    public Guid Id { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public DateTime Date { get; set; }
-    public Guid CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public string CategoryIcon { get; set; } = string.Empty;
-    public string CategoryColor { get; set; } = string.Empty;
-    public Guid AccountId { get; set; }
-    public string AccountName { get; set; } = string.Empty;
 }

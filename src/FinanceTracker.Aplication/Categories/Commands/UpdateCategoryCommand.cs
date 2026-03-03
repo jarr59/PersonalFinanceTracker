@@ -8,7 +8,7 @@ public sealed record UpdateCategoryCommand(Guid Id, string Name, string ColorHex
 
 public class UpdateCategoryCommandHandler(ICategoryRepository _repository, IUnitOfWork _unitOfWork) : ICustomCommandHandler<UpdateCategoryCommand, Category>
 {
-    public async Task<Category> HandleAsync(UpdateCategoryCommand command, CancellationToken cancellationToken = default)
+    public async Task<Category> HandleAsync(UpdateCategoryCommand command)
     {
         var existing = await _repository.GetById(command.Id);
         if (existing is null)

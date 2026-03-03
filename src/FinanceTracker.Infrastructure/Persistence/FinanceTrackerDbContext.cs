@@ -6,6 +6,7 @@ public class FinanceTrackerDbContext(DbContextOptions<FinanceTrackerDbContext> o
 {
     public DbSet<Domain.Transaction.Transaction> Transactions { get; set; }
     public DbSet<Domain.Categories.Category> Categories { get; set; }
+    public DbSet<Domain.Accounts.Account> Accounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

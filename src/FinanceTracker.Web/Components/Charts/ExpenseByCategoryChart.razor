@@ -1,0 +1,86 @@
+@using Radzen
+@using Radzen.Blazor
+@using FinanceTracker.Web.States.Transactions
+@inject TransactionState TransactionState
+@rendermode InteractiveServer
+
+<RadzenCard>
+    <RadzenText TextStyle="TextStyle.H6" style="margin-bottom: 1rem;">Análisis de Gastos por Categoría</RadzenText>
+    
+    <RadzenChart>
+        <RadzenBarSeries Data="@GetExpensesByCategory()" 
+                        CategoryProperty="CategoryName" 
+                        ValueProperty="TotalAmount"
+                        Title="Gasto Total">
+        </RadzenBarSeries>
+        <RadzenCategoryAxis Min="0" 
+                           Padding="0" 
+                           Step="1">
+        </RadzenCategoryAxis>
+        <RadzenValueAxis FormatString="{0:C0}"></RadzenValueAxis>
+    </RadzenChart>
+
+    <RadzenDataGrid Data="@GetExpensesByCategory()" 
+                   TItem="ExpenseByCategory"
+                   ColumnWidth="200px"
+                   Style="margin-top: 1rem;">
+        <Columns>
+            <RadzenDataGridColumn TItem="ExpenseByCategory" 
+                                 Property="CategoryName" 
+                                 Title="Categoría">
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ExpenseByCategory" 
+                                 Property="TotalAmount" 
+                                 Title="Monto Total" 
+                                 FormatString="{0:C}">
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ExpenseByCategory" 
+                                 Property="TransactionCount" 
+                                 Title="Cantidad">
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ExpenseByCategory" 
+                                 Property="Percentage" 
+                                 Title="Porcentaje">
+                <Template Context="data">
+                    @{
+                        var percentage = (int)data.Percentage;
+                    }
+                    <RadzenProgressBar Value="percentage" ShowValue="true" Style="margin: 0;"/>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
+
+@code {
+    public class ExpenseByCategory
+    {
+        public string CategoryName { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public int TransactionCount { get; set; }
+        public decimal Percentage { get; set; }
+    }
+
+    private List<ExpenseByCategory> GetExpensesByCategory()
+    {
+        var totalExpenses = TransactionState.GetTotalExpenses();
+        
+        if (totalExpenses == 0)
+            return new();
+
+        var grouped = TransactionState.Transactions
+            .Where(t => t.Amount < 0)
+            .GroupBy(t => t.CategoryName)
+            .Select(g => new ExpenseByCategory
+            {
+                CategoryName = g.Key,
+                TotalAmount = Math.Abs(g.Sum(t => t.Amount)),
+                TransactionCount = g.Count(),
+                Percentage = (Math.Abs(g.Sum(t => t.Amount)) / totalExpenses) * 100
+            })
+            .OrderByDescending(x => x.TotalAmount)
+            .ToList();
+
+        return grouped;
+    }
+}

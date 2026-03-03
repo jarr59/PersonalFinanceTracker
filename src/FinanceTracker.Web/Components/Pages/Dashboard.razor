@@ -1,8 +1,14 @@
 @page "/"
+@page "/dashboard"
 @using FinanceTracker.Web.States.Transactions
 @using FinanceTracker.Web.States.Accounts
+@using FinanceTracker.Web.Components.Metrics
+@using FinanceTracker.Web.Components.Charts
+@using Radzen
+@using Radzen.Blazor
 @inject TransactionState TransactionState
 @inject AccountState AccountState
+@inherits StateAwareComponent
 @rendermode InteractiveServer
 
 <Sidebar />
@@ -23,7 +29,7 @@
     <!-- Transactions and Balance Section -->
     <div class="dashboard-grid">
         <div style="grid-column: span 2;">
-            <TransactionList Transactions="GetTransactions()" />
+            @* <TransactionList Transactions="GetTransactions()" /> *@
         </div>
         
         <div>

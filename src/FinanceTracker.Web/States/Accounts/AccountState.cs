@@ -1,3 +1,5 @@
+using FinanceTracker.Domain.ValueObjects;
+
 namespace FinanceTracker.Web.States.Accounts;
 
 public sealed class AccountState : StateContainerBase
@@ -32,6 +34,17 @@ public sealed class AccountState : StateContainerBase
             Color = "#8b5cf6"
         }
     };
+
+    // Loading states
+    public bool IsLoading { get; private set; }
+    public bool IsAdding { get; private set; }
+    public bool IsUpdating { get; private set; }
+    public bool IsDeleting { get; private set; }
+
+    /// <summary>
+    /// Indica si hay alguna operación en curso
+    /// </summary>
+    public bool IsBusy => IsLoading || IsAdding || IsUpdating || IsDeleting;
 
     public void AddAccount(AccountModel account)
     {
@@ -72,6 +85,37 @@ public sealed class AccountState : StateContainerBase
             NotifyStateChanged();
         }
     }
+
+    public void CleanAccounts()
+    {
+        Accounts.Clear();
+        NotifyStateChanged();
+    }
+
+    // Loading state management
+    public void SetIsLoading()
+    {
+        IsLoading = !IsLoading;
+        NotifyStateChanged();
+    }
+
+    public void SetIsAdding()
+    {
+        IsAdding = !IsAdding;
+        NotifyStateChanged();
+    }
+
+    public void SetIsUpdating()
+    {
+        IsUpdating = !IsUpdating;
+        NotifyStateChanged();
+    }
+
+    public void SetIsDeleting()
+    {
+        IsDeleting = !IsDeleting;
+        NotifyStateChanged();
+    }
 }
 
 public class AccountModel
@@ -80,6 +124,6 @@ public class AccountModel
     public string Name { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public string Currency { get; set; } = "USD";
-    public string Icon { get; set; } = "credit_card";
-    public string Color { get; set; } = "#3b82f6";
+    public string Icon { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
 }
